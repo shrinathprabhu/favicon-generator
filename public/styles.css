@@ -1,0 +1,99 @@
+:root {
+  color-scheme: light;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #171717;
+  background: #f7f7f4;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 32px 16px;
+}
+
+.shell {
+  width: min(100%, 520px);
+  background: #ffffff;
+  border: 1px solid #d9d9d3;
+  border-radius: 8px;
+  padding: 28px;
+  box-shadow: 0 10px 30px rgba(23, 23, 23, 0.08);
+}
+
+h1 {
+  margin: 0 0 8px;
+  font-size: 32px;
+  line-height: 1.1;
+  font-weight: 700;
+}
+
+p {
+  margin: 0;
+  color: #55554e;
+  line-height: 1.5;
+}
+
+form {
+  display: grid;
+  gap: 10px;
+  margin-top: 28px;
+}
+
+label {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+input {
+  width: 100%;
+  min-height: 44px;
+  border: 1px solid #c9c9c1;
+  border-radius: 6px;
+  padding: 10px 12px;
+  font: inherit;
+  background: #ffffff;
+}
+
+input[type="file"] {
+  padding: 8px 10px;
+}
+
+button {
+  min-height: 44px;
+  margin-top: 10px;
+  border: 0;
+  border-radius: 6px;
+  padding: 10px 14px;
+  font: inherit;
+  font-weight: 700;
+  color: #ffffff;
+  background: #146c43;
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: wait;
+  background: #6f7f76;
+}
+
+#status {
+  min-height: 24px;
+  margin-top: 16px;
+  font-size: 14px;
+}
+
+@media (max-width: 420px) {
+  .shell {
+    padding: 22px;
+  }
+
+  h1 {
+    font-size: 28px;
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "name": "favicon-generator",
+  "version": "1.0.0",
+  "description": "CLI and GUI tool that generates favicon.ico, PNG app icons, platform assets, and web metadata from an SVG.",
+  "type": "module",
+  "bin": {
+    "favicon-generator": "./bin/favicon-generator.js",
+    "favicon-generator-gui": "./bin/favicon-generator-gui.js"
+  },
+  "scripts": {
+    "check": "node --check ./bin/favicon-generator.js && node --check ./bin/favicon-generator-gui.js && node --check ./src/generator.js && node --check ./public/app.js",
+    "cli": "node ./bin/favicon-generator.js",
+    "gui": "node ./bin/favicon-generator-gui.js",
+    "start": "node ./bin/favicon-generator.js"
+  },
+  "keywords": [
+    "favicon",
+    "svg",
+    "icon",
+    "apple-touch-icon",
+    "manifest"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "archiver": "^8.0.0",
+    "express": "^5.2.1",
+    "multer": "^2.1.1",
+    "sharp": "^0.34.5"
+  }
+}
