@@ -25,55 +25,140 @@ export const GENERATED_FILES = [
   ...PNG_SIZES.map((size) => `favicon-${size}x${size}.png`)
 ];
 
+export const SUPPORTED_EXTENSIONS = new Set([
+  '.svg',
+  '.png',
+  '.webp',
+  '.jpg',
+  '.jpeg',
+  '.avif',
+  '.gif',
+  '.bmp',
+  '.ico',
+  '.tiff'
+]);
+
 export async function generateFaviconAssetsFromFile({ inputPath, appName, outRoot = process.cwd() }) {
   const resolvedInput = path.resolve(inputPath);
+  const ext = path.extname(resolvedInput).toLowerCase();
 
-  if (path.extname(resolvedInput).toLowerCase() !== '.svg') {
-    throw new Error('Input must be an .svg file. Other image formats are intentionally rejected.');
+  if (!SUPPORTED_EXTENSIONS.has(ext)) {
+    throw new Error(`Unsupported image format: "${ext}". Supported formats: ${Array.from(SUPPORTED_EXTENSIONS).join(', ')}`);
   }
 
-  const svgText = await fs.readFile(resolvedInput, 'utf8');
-  return generateFaviconAssets({ svgText, appName, outRoot, sourceName: resolvedInput });
+  const inputBuffer = await fs.readFile(resolvedInput);
+  return generateFaviconAssets({
+    inputBuffer,
+    sourceExt: ext,
+    appName,
+    outRoot,
+    sourceName: resolvedInput
+  });
 }
 
-export async function generateFaviconAssets({ svgText, appName, outRoot = process.cwd(), sourceName = 'uploaded file' }) {
-  validateSvg(svgText, sourceName);
-
+export async function generateFaviconAssets({
+  inputBuffer,
+  svgText,
+  sourceExt,
+  appName,
+  outRoot = process.cwd(),
+  sourceName = 'uploaded file'
+}) {
   const appSlug = slugifyAppName(appName);
   const outDir = path.join(path.resolve(outRoot), `${appSlug}-favicon`);
-  const svgBuffer = Buffer.from(svgText);
+
+  let rawBuffer;
+  let originalFilename;
+  let faviconSvgText;
+
+  if (svgText != null) {
+    validateSvg(svgText, sourceName);
+    rawBuffer = Buffer.from(svgText);
+    originalFilename = 'original.svg';
+    faviconSvgText = svgText;
+  } else if (inputBuffer != null) {
+    rawBuffer = Buffer.isBuffer(inputBuffer) ? inputBuffer : Buffer.from(inputBuffer);
+    const ext = (sourceExt || path.extname(sourceName) || '').toLowerCase();
+    const preview = rawBuffer.subarray(0, 100).toString('utf8').trimStart();
+
+    if (ext === '.svg' || /<svg(?:\s|>)/i.test(preview)) {
+      const text = rawBuffer.toString('utf8');
+      validateSvg(text, sourceName);
+      originalFilename = 'original.svg';
+      faviconSvgText = text;
+    } else {
+      const cleanExt = ext.replace(/^\./, '') || 'png';
+      originalFilename = `original.${cleanExt}`;
+      const mime = getMimeType(cleanExt);
+      const base64 = rawBuffer.toString('base64');
+      faviconSvgText = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <image href="data:${mime};base64,${base64}" width="512" height="512" preserveAspectRatio="xMidYMid meet"/>
+</svg>\n`;
+    }
+  } else {
+    throw new Error('Either inputBuffer or svgText must be provided.');
+  }
 
   await fs.mkdir(outDir, { recursive: true });
 
   const pngBuffers = new Map();
   for (const size of PNG_SIZES) {
-    const buffer = await renderPng(svgBuffer, size);
+    const buffer = await renderPng(rawBuffer, size);
     pngBuffers.set(size, buffer);
     await fs.writeFile(path.join(outDir, `favicon-${size}x${size}.png`), buffer);
   }
 
   for (const icon of PLATFORM_ICONS) {
-    const buffer = await renderPng(svgBuffer, icon.size);
+    const buffer = await renderPng(rawBuffer, icon.size);
     await fs.writeFile(path.join(outDir, icon.name), buffer);
   }
 
   const icoBuffers = [];
   for (const size of ICO_SIZES) {
-    icoBuffers.push({ size, buffer: pngBuffers.get(size) ?? await renderPng(svgBuffer, size) });
+    icoBuffers.push({ size, buffer: pngBuffers.get(size) ?? await renderPng(rawBuffer, size) });
   }
 
   await fs.writeFile(path.join(outDir, 'favicon.ico'), createIco(icoBuffers));
-  await fs.writeFile(path.join(outDir, 'original.svg'), svgText);
-  await fs.writeFile(path.join(outDir, 'favicon.svg'), svgText);
+  await fs.writeFile(path.join(outDir, 'favicon.svg'), faviconSvgText);
+  await fs.writeFile(path.join(outDir, originalFilename), rawBuffer);
   await fs.writeFile(path.join(outDir, 'site.webmanifest'), createManifest(appName));
   await fs.writeFile(path.join(outDir, 'browserconfig.xml'), createBrowserConfig());
   await fs.writeFile(path.join(outDir, 'html-tags.txt'), createHtmlTags(appSlug));
 
+  const generatedFiles = [
+    'favicon.ico',
+    'favicon.svg',
+    originalFilename,
+    'apple-touch-icon.png',
+    'android-chrome-192x192.png',
+    'android-chrome-512x512.png',
+    'mstile-150x150.png',
+    'site.webmanifest',
+    'browserconfig.xml',
+    'html-tags.txt',
+    ...PNG_SIZES.map((size) => `favicon-${size}x${size}.png`)
+  ];
+
   return {
     appSlug,
     outDir,
-    files: GENERATED_FILES
+    files: generatedFiles
   };
+}
+
+export function getMimeType(ext) {
+  const map = {
+    png: 'image/png',
+    webp: 'image/webp',
+    jpg: 'image/jpeg',
+    jpeg: 'image/jpeg',
+    avif: 'image/avif',
+    gif: 'image/gif',
+    bmp: 'image/bmp',
+    ico: 'image/x-icon',
+    tiff: 'image/tiff'
+  };
+  return map[ext] || 'image/png';
 }
 
 export function slugifyAppName(name) {

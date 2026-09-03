@@ -1,6 +1,6 @@
 # Favicon Generator
 
-A simple sharp wrapper that generates favicon for your apps with a single SVG
+A simple tool that generates favicon.ico, PNG app icons, platform assets, and web metadata from an SVG, PNG, WebP, or other image formats.
 
 ## Install
 
@@ -12,9 +12,11 @@ npm install
 
 ```sh
 npm run cli -- --input ./logo.svg --app-name "My App"
+# Or with a PNG/WebP:
+npm run cli -- --input ./logo.png --app-name "My App"
 ```
 
-You can also pass the SVG and app name as positional arguments:
+You can also pass the image file and app name as positional arguments:
 
 ```sh
 npm run cli -- ./logo.svg "My App" --out ./public
@@ -28,13 +30,13 @@ favicon-generator ./logo.svg "My App" --out ./public
 
 CLI options:
 
-- `-i, --input <file>`: source SVG file. Required.
+- `-i, --input <file>`: source image file (SVG, PNG, WebP, JPEG, etc.). Required.
 - `-n, --app-name <name>`: app name used for the output folder and manifest. Required.
 - `-o, --out <directory>`: parent output directory. Defaults to the current directory.
 - `-h, --help`: show help.
 - `-v, --version`: show version.
 
-The input must be an `.svg` file. Other image formats are rejected.
+Supported formats: `.svg`, `.png`, `.webp`, `.jpg`, `.jpeg`, `.avif`, `.gif`, `.bmp`, `.ico`, `.tiff`.
 
 ## GUI
 

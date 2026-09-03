@@ -10,15 +10,15 @@
     <main class="shell">
       <header>
         <h1>Favicon Generator</h1>
-        <p>A simple sharp wrapper that generates favicon for your apps with a single SVG</p>
+        <p>Generate complete favicon packages, platform icons, and web metadata from SVG, PNG, WebP, or other images directly in your browser.</p>
       </header>
 
-      <form id="generator-form" action="/generate" method="post" enctype="multipart/form-data">
+      <form id="generator-form">
         <label for="appName">App name</label>
         <input id="appName" name="appName" type="text" autocomplete="organization" placeholder="My App" required>
 
-        <label for="svg">SVG file</label>
-        <input id="svg" name="svg" type="file" accept=".svg,image/svg+xml" required>
+        <label for="imageFile">Image file (SVG, PNG, WebP, JPEG)</label>
+        <input id="imageFile" name="imageFile" type="file" accept=".svg,.png,.webp,.jpg,.jpeg,.avif,.gif,.ico,image/*" required>
 
         <button type="submit">Generate ZIP</button>
       </form>

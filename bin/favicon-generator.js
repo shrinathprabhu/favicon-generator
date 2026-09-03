@@ -28,7 +28,7 @@ async function main() {
   }
 
   if (!options.input) {
-    throw new Error('Missing SVG input. Use --input ./logo.svg or pass it as the first positional argument.');
+    throw new Error('Missing image input. Use --input ./logo.svg (or PNG, WebP, etc.) or pass it as the first positional argument.');
   }
 
   if (!options.appName) {
@@ -42,7 +42,7 @@ async function main() {
   });
 
   console.log(`Generated favicon assets in ${result.outDir}`);
-  for (const file of GENERATED_FILES) {
+  for (const file of result.files) {
     console.log(`- ${file}`);
   }
 }
@@ -133,14 +133,14 @@ function readValue(args, index, optionName) {
 function printHelp() {
   console.log(`favicon-generator ${packageJson.version}
 
-Generate favicon.ico, PNG app icons, platform assets, metadata, and SVG copies from an SVG source.
+Generate favicon.ico, PNG app icons, platform assets, and web metadata from an SVG, PNG, WebP, or other image source.
 
 Usage:
   favicon-generator --input ./logo.svg --app-name "My App" [--out ./public]
-  favicon-generator ./logo.svg "My App" --out ./public
+  favicon-generator ./logo.png "My App" --out ./public
 
 Options:
-  -i, --input <file>       Source SVG file. Required.
+  -i, --input <file>       Source image file (SVG, PNG, WebP, JPEG, etc.). Required.
   -n, --app-name <name>    App name used for the output folder and manifest. Required.
   -o, --out <directory>    Parent output directory. Defaults to the current directory.
   -h, --help               Show help.

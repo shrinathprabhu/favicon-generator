@@ -7,7 +7,7 @@ import { fileURLToPath } from 'node:url';
 import { ZipArchive } from 'archiver';
 import express from 'express';
 import multer from 'multer';
-import { generateFaviconAssets } from '../src/generator.js';
+import { SUPPORTED_EXTENSIONS, generateFaviconAssets } from '../src/generator.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const rootDir = path.resolve(__dirname, '..');
@@ -36,7 +36,7 @@ const app = express();
 const upload = multer({
   storage: multer.memoryStorage(),
   limits: {
-    fileSize: 10 * 1024 * 1024,
+    fileSize: 25 * 1024 * 1024,
     files: 1
   }
 });
@@ -47,31 +47,33 @@ app.get('/healthz', (request, response) => {
   response.type('text/plain').send('ok');
 });
 
-app.post('/generate', upload.single('svg'), async (request, response, next) => {
+app.post('/generate', upload.any(), async (request, response, next) => {
   let tempRoot;
 
   try {
     const appName = String(request.body.appName ?? '').trim();
-    const svgFile = request.file;
+    const imageFile = request.files?.[0] ?? request.file;
 
     if (!appName) {
       throw new Error('App name is required.');
     }
 
-    if (!svgFile) {
-      throw new Error('SVG file is required.');
+    if (!imageFile) {
+      throw new Error('Image file is required.');
     }
 
-    if (path.extname(svgFile.originalname).toLowerCase() !== '.svg') {
-      throw new Error('Only .svg files are supported.');
+    const ext = path.extname(imageFile.originalname).toLowerCase();
+    if (!SUPPORTED_EXTENSIONS.has(ext)) {
+      throw new Error(`Unsupported image format "${ext}". Supported formats: ${Array.from(SUPPORTED_EXTENSIONS).join(', ')}`);
     }
 
     tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), 'favicon-generator-'));
     const result = await generateFaviconAssets({
-      svgText: svgFile.buffer.toString('utf8'),
+      inputBuffer: imageFile.buffer,
+      sourceExt: ext,
       appName,
       outRoot: tempRoot,
-      sourceName: svgFile.originalname
+      sourceName: imageFile.originalname
     });
 
     const zipName = `${result.appSlug}-favicon.zip`;
@@ -206,7 +208,7 @@ function parsePort(value) {
 
 function multerMessage(error) {
   if (error.code === 'LIMIT_FILE_SIZE') {
-    return 'SVG file is too large. Maximum size is 10 MB.';
+    return 'Image file is too large. Maximum size is 25 MB.';
   }
 
   return error.message;
