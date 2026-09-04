@@ -8,6 +8,8 @@ Created by OwlEye Analytics: https://owleye.dev
 
 Developer: https://shrinath.me
 
+Social preview image: https://lowkey.tools/favigen/og-image.png
+
 Favicon Generator, also called Favigen, is a free developer utility for generating favicon and app icon bundles from one source image. It is designed for apps, websites, and open-source projects that need standard favicon.ico, PNG app icons, platform icons, and web metadata.
 
 ## Key facts

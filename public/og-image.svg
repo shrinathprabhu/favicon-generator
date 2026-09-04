@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630" role="img" aria-labelledby="title desc">
+  <title id="title">Favicon Generator social preview</title>
+  <desc id="desc">Social preview image for Favicon Generator by OwlEye Analytics.</desc>
+  <rect width="1200" height="630" fill="#f7f7f4"/>
+  <rect x="48" y="48" width="1104" height="534" rx="28" fill="#ffffff" stroke="#d9d9d3" stroke-width="2"/>
+  <g transform="translate(92 96)">
+    <rect x="0" y="0" width="112" height="112" rx="24" fill="#f7f7f4"/>
+    <path fill="#171717" d="M89.25 14a8.75 8.75 0 0 1 8.75 8.75v66.5A8.75 8.75 0 0 1 89.25 98h-66.5A8.75 8.75 0 0 1 14 89.25v-66.5A8.75 8.75 0 0 1 22.75 14h66.5Zm0 8h-66.5a.75.75 0 0 0-.75.75v66.5c0 .42.33.75.75.75h66.5c.42 0 .75-.33.75-.75v-66.5a.75.75 0 0 0-.75-.75Z"/>
+    <path fill="#146c43" d="M38 31h39v12H52v14h22v12H52v21H38V31Z"/>
+  </g>
+  <text x="92" y="270" fill="#171717" font-family="Inter, Arial, sans-serif" font-size="76" font-weight="800" letter-spacing="0">Favicon Generator</text>
+  <text x="96" y="342" fill="#333833" font-family="Inter, Arial, sans-serif" font-size="34" font-weight="500" letter-spacing="0">A simple Sharp wrapper that generates favicon</text>
+  <text x="96" y="388" fill="#333833" font-family="Inter, Arial, sans-serif" font-size="34" font-weight="500" letter-spacing="0">assets for your apps with a single SVG.</text>
+  <g fill="#146c43" font-family="Inter, Arial, sans-serif" font-size="25" font-weight="700" letter-spacing="0">
+    <text x="96" y="482">favicon.ico</text>
+    <text x="260" y="482">PNG app icons</text>
+    <text x="486" y="482">Apple + Android + Windows</text>
+    <text x="874" y="482">web metadata</text>
+  </g>
+  <text x="96" y="536" fill="#55554e" font-family="Inter, Arial, sans-serif" font-size="23" font-weight="600" letter-spacing="0">lowkey.tools/favigen</text>
+  <text x="696" y="536" fill="#55554e" font-family="Inter, Arial, sans-serif" font-size="23" font-weight="600" letter-spacing="0">From the makers of OwlEye Analytics</text>
+</svg>
