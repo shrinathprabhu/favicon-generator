@@ -68,6 +68,26 @@ You can change the port:
 npm run gui -- --port 5174
 ```
 
+## Deploy on Vercel
+
+This repo includes `vercel.json` for Vercel static hosting. The Vercel project should use:
+
+- Framework preset: Other
+- Build command: leave empty
+- Output directory: `public`
+- Install command: default
+
+Deploy with the Vercel CLI:
+
+```sh
+vercel
+vercel --prod
+```
+
+The Vercel config serves the app at `/` and also rewrites `/favigen` plus `/favigen/*` to the static files in `public`, so it can sit behind the `lowkey.tools/favigen` proxy rewrite.
+
+For SEO discovery on the parent domain, keep the root `lowkey.tools` sitemap and robots configuration aware of `https://lowkey.tools/favigen`.
+
 ## Generated Files
 
 Assets are written into a single folder named `<appname>-favicon`. App names are slugified for filesystem safety, so `"My App"` becomes `my-app-favicon`.
