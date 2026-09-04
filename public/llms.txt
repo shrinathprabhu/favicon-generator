@@ -1,0 +1,36 @@
+# Favicon Generator
+
+Canonical URL: https://lowkey.tools/favigen
+
+Source code: https://github.com/shrinathprabhu/favigen
+
+Created by OwlEye Analytics: https://owleye.dev
+
+Developer: https://shrinath.me
+
+Favicon Generator, also called Favigen, is a free developer utility for generating favicon and app icon bundles from one source image. It is designed for apps, websites, and open-source projects that need standard favicon.ico, PNG app icons, platform icons, and web metadata.
+
+## Key facts
+
+- Input: SVG is the primary intended source format.
+- Output folder: `<appname>-favicon`.
+- Generated favicon files: `favicon.ico`, `favicon.svg`, `original.svg`.
+- Generated PNG sizes: `favicon-16x16.png`, `favicon-32x32.png`, `favicon-48x48.png`, `favicon-64x64.png`, `favicon-128x128.png`, `favicon-256x256.png`.
+- Generated platform assets: `apple-touch-icon.png`, `android-chrome-192x192.png`, `android-chrome-512x512.png`, `mstile-150x150.png`.
+- Generated metadata: `site.webmanifest`, `browserconfig.xml`, `html-tags.txt`.
+
+## CLI usage
+
+```sh
+npm install
+npm run cli -- --input ./logo.svg --app-name "My App"
+```
+
+## GUI usage
+
+```sh
+npm install
+npm run gui
+```
+
+Then open `http://127.0.0.1:5173`.

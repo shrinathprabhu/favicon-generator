@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-labelledby="title desc">
+  <title id="title">Favigen logo</title>
+  <desc id="desc">A simple rounded square favicon generator logo with the letter F.</desc>
+  <style>
+    .bg { fill: #f7f7f4; }
+    .border { fill: #171717; }
+    .mark { fill: #146c43; }
+    @media (prefers-color-scheme: dark) {
+      .bg { fill: #171717; }
+      .border { fill: #f7f7f4; }
+      .mark { fill: #38b26f; }
+    }
+  </style>
+  <rect class="bg" x="8" y="8" width="240" height="240" rx="44"/>
+  <path class="border" d="M204 32a20 20 0 0 1 20 20v152a20 20 0 0 1-20 20H52a20 20 0 0 1-20-20V52a20 20 0 0 1 20-20h152Zm0 18H52a2 2 0 0 0-2 2v152a2 2 0 0 0 2 2h152a2 2 0 0 0 2-2V52a2 2 0 0 0-2-2Z"/>
+  <path class="mark" d="M88 72h88v28h-56v31h49v28h-49v49H88V72Z"/>
+</svg>

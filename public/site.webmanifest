@@ -1,0 +1,27 @@
+{
+  "name": "Favicon Generator",
+  "short_name": "Favigen",
+  "description": "A simple Sharp wrapper that generates favicon assets for your apps with a single SVG.",
+  "start_url": "/favigen",
+  "scope": "/favigen/",
+  "display": "standalone",
+  "background_color": "#f7f7f4",
+  "theme_color": "#146c43",
+  "icons": [
+    {
+      "src": "/favigen/android-chrome-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/favigen/android-chrome-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "/favigen/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}

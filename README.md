@@ -1,6 +1,10 @@
 # Favicon Generator
 
-A simple tool that generates favicon.ico, PNG app icons, platform assets, and web metadata from an SVG, PNG, WebP, or other image formats.
+A simple sharp wrapper that generates favicon for your apps with a single SVG
+
+Canonical URL: <https://lowkey.tools/favigen>  
+GitHub: <https://github.com/shrinathprabhu/favigen>  
+From the makers of [OwlEye Analytics](https://owleye.dev)
 
 ## Install
 
@@ -12,8 +16,6 @@ npm install
 
 ```sh
 npm run cli -- --input ./logo.svg --app-name "My App"
-# Or with a PNG/WebP:
-npm run cli -- --input ./logo.png --app-name "My App"
 ```
 
 You can also pass the image file and app name as positional arguments:
@@ -30,7 +32,7 @@ favicon-generator ./logo.svg "My App" --out ./public
 
 CLI options:
 
-- `-i, --input <file>`: source image file (SVG, PNG, WebP, JPEG, etc.). Required.
+- `-i, --input <file>`: source image file. SVG is the recommended input.
 - `-n, --app-name <name>`: app name used for the output folder and manifest. Required.
 - `-o, --out <directory>`: parent output directory. Defaults to the current directory.
 - `-h, --help`: show help.
@@ -52,7 +54,13 @@ Open this URL in Chrome:
 http://127.0.0.1:5173
 ```
 
-Pick an SVG, enter an app name, and the browser downloads a ZIP containing the generated `<appname>-favicon` folder.
+The canonical local route is also available:
+
+```text
+http://127.0.0.1:5173/favigen
+```
+
+Pick an image, enter an app name, and the browser downloads a ZIP containing the generated `<appname>-favicon` folder.
 
 You can change the port:
 
@@ -84,3 +92,7 @@ Generated files:
 - `html-tags.txt`
 
 PNG outputs use transparent padding for non-square SVGs, Lanczos resizing, alpha preservation, and size-aware sharpening.
+
+## Site Metadata
+
+The static GUI includes canonical tags, Open Graph tags, Twitter summary tags, JSON-LD, `robots.txt`, `sitemap.xml`, `llms.txt`, `humans.txt`, a web manifest, and simple light/dark favicon assets.

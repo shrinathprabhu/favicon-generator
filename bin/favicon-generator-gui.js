@@ -42,6 +42,10 @@ const upload = multer({
 });
 
 app.use(express.static(publicDir));
+app.get(['/favigen', '/favigen/'], (request, response) => {
+  response.sendFile(path.join(publicDir, 'index.html'));
+});
+app.use('/favigen', express.static(publicDir));
 
 app.get('/healthz', (request, response) => {
   response.type('text/plain').send('ok');
@@ -128,7 +132,8 @@ app.use((error, request, response, next) => {
 const server = app.listen(options.port, options.host, () => {
   const url = `http://${options.host}:${options.port}`;
   console.log(`Favicon Generator GUI running at ${url}`);
-  console.log('Open this URL in Chrome.');
+  console.log(`Canonical local page: ${url}/favigen`);
+  console.log('Open either URL in Chrome.');
 });
 
 server.on('error', (error) => {

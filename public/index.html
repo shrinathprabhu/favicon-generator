@@ -3,14 +3,120 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Favicon Generator</title>
-    <link rel="stylesheet" href="/styles.css">
+    <title>Favicon Generator - Generate favicon.ico and app icons from one SVG</title>
+    <meta name="description" content="A simple Sharp wrapper that generates favicon.ico, PNG app icons, Apple touch icons, Android icons, Windows tile assets, web manifest, and HTML tags from a single SVG.">
+    <meta name="keywords" content="favicon generator, SVG to favicon, favicon.ico generator, app icon generator, Apple touch icon generator, Android chrome icon, Windows tile icon, web manifest generator, Sharp favicon wrapper, Favigen">
+    <meta name="author" content="OwlEye Analytics">
+    <meta name="application-name" content="Favicon Generator">
+    <meta name="robots" content="index, follow, max-image-preview:large">
+    <link rel="canonical" href="https://lowkey.tools/favigen">
+    <link rel="icon" href="/favigen/favicon.ico" sizes="any">
+    <link rel="icon" href="/favigen/favicon.svg" type="image/svg+xml">
+    <link rel="icon" href="/favigen/favicon-32x32.png" type="image/png" sizes="32x32">
+    <link rel="icon" href="/favigen/favicon-16x16.png" type="image/png" sizes="16x16">
+    <link rel="apple-touch-icon" href="/favigen/apple-touch-icon.png">
+    <link rel="manifest" href="/favigen/site.webmanifest">
+    <link rel="author" href="/favigen/humans.txt">
+    <link rel="sitemap" type="application/xml" href="/favigen/sitemap.xml">
+    <meta name="msapplication-config" content="/favigen/browserconfig.xml">
+    <meta name="theme-color" content="#f7f7f4" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#171717" media="(prefers-color-scheme: dark)">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Favicon Generator">
+    <meta property="og:title" content="Favicon Generator">
+    <meta property="og:description" content="Generate favicon.ico, platform app icons, web manifest files, and HTML tags from one SVG.">
+    <meta property="og:url" content="https://lowkey.tools/favigen">
+    <meta property="og:locale" content="en_US">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="Favicon Generator">
+    <meta name="twitter:description" content="A simple Sharp wrapper that generates favicon assets for your apps with a single SVG.">
+    <!-- Add og:image and twitter:image after the social preview image is available. -->
+    <link rel="stylesheet" href="/favigen/styles.css">
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "WebApplication",
+            "@id": "https://lowkey.tools/favigen#app",
+            "name": "Favicon Generator",
+            "alternateName": "Favigen",
+            "url": "https://lowkey.tools/favigen",
+            "applicationCategory": "DeveloperApplication",
+            "operatingSystem": "Any",
+            "isAccessibleForFree": true,
+            "description": "A simple Sharp wrapper that generates favicon.ico, PNG app icons, Apple touch icons, Android icons, Windows tile assets, web manifest, and HTML tags from a single SVG.",
+            "browserRequirements": "Requires JavaScript and a modern browser.",
+            "image": "https://lowkey.tools/favigen/logo.svg",
+            "logo": "https://lowkey.tools/favigen/logo.svg",
+            "creator": {
+              "@type": "Organization",
+              "name": "OwlEye Analytics",
+              "url": "https://owleye.dev"
+            },
+            "author": {
+              "@type": "Person",
+              "name": "Shrinath Prabhu",
+              "url": "https://shrinath.me"
+            },
+            "codeRepository": "https://github.com/shrinathprabhu/favigen",
+            "offers": {
+              "@type": "Offer",
+              "price": "0",
+              "priceCurrency": "USD"
+            },
+            "featureList": [
+              "Generate favicon.ico",
+              "Generate PNG icons in 16x16, 32x32, 48x48, 64x64, 128x128, and 256x256 sizes",
+              "Generate Apple touch icon, Android Chrome icons, Windows tile icon, web manifest, browserconfig.xml, and HTML tags",
+              "Copy the original source image into the output bundle"
+            ],
+            "sameAs": [
+              "https://github.com/shrinathprabhu/favigen",
+              "https://owleye.dev",
+              "https://shrinath.me"
+            ]
+          },
+          {
+            "@type": "FAQPage",
+            "@id": "https://lowkey.tools/favigen#faq",
+            "mainEntity": [
+              {
+                "@type": "Question",
+                "name": "What does Favicon Generator create?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "It creates favicon.ico, favicon.svg, PNG favicon sizes, Apple touch icon, Android Chrome icons, Windows tile icon, site.webmanifest, browserconfig.xml, html-tags.txt, and a copy of the original source image."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Can I use Favicon Generator from the command line?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Yes. Install dependencies with npm install, then run npm run cli -- --input ./logo.svg --app-name \"My App\"."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Is Favicon Generator open source?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Yes. The source code is available at https://github.com/shrinathprabhu/favigen."
+                }
+              }
+            ]
+          }
+        ]
+      }
+    </script>
   </head>
   <body>
     <main class="shell">
       <header>
+        <img class="logo" src="/favigen/logo.svg" alt="" width="64" height="64">
         <h1>Favicon Generator</h1>
-        <p>Generate complete favicon packages, platform icons, and web metadata from SVG, PNG, WebP, or other images directly in your browser.</p>
+        <p>A simple sharp wrapper that generates favicon for your apps with a single SVG</p>
       </header>
 
       <form id="generator-form">
@@ -24,8 +130,24 @@
       </form>
 
       <p id="status" role="status" aria-live="polite"></p>
+
+      <section class="content-section" aria-labelledby="output-heading">
+        <h2 id="output-heading">What It Generates</h2>
+        <p>Each download includes favicon.ico, favicon.svg, PNG sizes from 16x16 to 256x256, Apple touch icon, Android Chrome icons, Windows tile icon, site.webmanifest, browserconfig.xml, html-tags.txt, and the original source image.</p>
+      </section>
+
+      <section class="content-section" aria-labelledby="cli-heading">
+        <h2 id="cli-heading">CLI</h2>
+        <p><code>npm run cli -- --input ./logo.svg --app-name "My App"</code></p>
+      </section>
+
+      <footer>
+        <a href="https://github.com/shrinathprabhu/favigen" rel="noopener noreferrer">GitHub</a>
+        <span aria-hidden="true">/</span>
+        <a href="https://owleye.dev" rel="noopener noreferrer">From the makers of OwlEye Analytics</a>
+      </footer>
     </main>
 
-    <script src="/app.js"></script>
+    <script src="/favigen/app.js"></script>
   </body>
 </html>

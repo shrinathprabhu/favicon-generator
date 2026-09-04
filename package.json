@@ -1,7 +1,15 @@
 {
   "name": "favicon-generator",
   "version": "1.0.0",
-  "description": "CLI and GUI tool that generates favicon.ico, PNG app icons, platform assets, and web metadata from an SVG.",
+  "description": "A simple Sharp wrapper that generates favicon assets for your apps with a single SVG.",
+  "homepage": "https://lowkey.tools/favigen",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/shrinathprabhu/favigen.git"
+  },
+  "bugs": {
+    "url": "https://github.com/shrinathprabhu/favigen/issues"
+  },
   "type": "module",
   "bin": {
     "favicon-generator": "./bin/favicon-generator.js",
@@ -18,8 +26,12 @@
     "svg",
     "icon",
     "apple-touch-icon",
-    "manifest"
+    "manifest",
+    "favicon-generator",
+    "sharp",
+    "favigen"
   ],
+  "author": "Shrinath Prabhu <https://shrinath.me>",
   "license": "MIT",
   "dependencies": {
     "archiver": "^8.0.0",

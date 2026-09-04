@@ -1,0 +1,11 @@
+Favicon Generator
+
+Created by OwlEye Analytics
+https://owleye.dev
+
+Developer
+Shrinath Prabhu
+https://shrinath.me
+
+Source
+https://github.com/shrinathprabhu/favigen
