@@ -5,10 +5,10 @@
   "homepage": "https://lowkey.tools/favigen",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/shrinathprabhu/favigen.git"
+    "url": "git+https://github.com/shrinathprabhu/favicon-generator.git"
   },
   "bugs": {
-    "url": "https://github.com/shrinathprabhu/favigen/issues"
+    "url": "https://github.com/shrinathprabhu/favicon-generator/issues"
   },
   "type": "module",
   "bin": {

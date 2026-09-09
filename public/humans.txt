@@ -8,4 +8,4 @@ Shrinath Prabhu
 https://shrinath.me
 
 Source
-https://github.com/shrinathprabhu/favigen
+https://github.com/shrinathprabhu/favicon-generator

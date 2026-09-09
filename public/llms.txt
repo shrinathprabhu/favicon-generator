@@ -2,7 +2,7 @@
 
 Canonical URL: https://lowkey.tools/favigen
 
-Source code: https://github.com/shrinathprabhu/favigen
+Source code: https://github.com/shrinathprabhu/favicon-generator
 
 Created by OwlEye Analytics: https://owleye.dev
 

@@ -2,13 +2,17 @@
 
 A simple sharp wrapper that generates favicon for your apps with a single SVG
 
-Canonical URL: <https://lowkey.tools/favigen>  
-GitHub: <https://github.com/shrinathprabhu/favigen>  
+Canonical URL: <https://lowkey.tools/favigen>
+
+GitHub: <https://github.com/shrinathprabhu/favicon-generator>
+
 From the makers of [OwlEye Analytics](https://owleye.dev)
 
 ## Install
 
 ```sh
+git clone https://github.com/shrinathprabhu/favicon-generator.git
+cd favicon-generator
 npm install
 ```
 
