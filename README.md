@@ -2,11 +2,15 @@
 
 A simple sharp wrapper that generates favicon for your apps with a single SVG
 
-Canonical URL: <https://lowkey.tools/favigen>
+Canonical URL: <https://favigen.lowkey.tools/>
 
 GitHub: <https://github.com/shrinathprabhu/favicon-generator>
 
 From the makers of [OwlEye Analytics](https://owleye.dev)
+
+Made by [Shrinath Prabhu](https://shrinath.me). Follow [@shrinath_prabhu on X](https://x.com/shrinath_prabhu).
+
+Explore the rest of [lowkey.tools](https://lowkey.tools). Working on the rest of your project? Settle into a focus session with [SuperFocus](https://superfocus.lowkey.tools/).
 
 ## Install
 
@@ -58,12 +62,6 @@ Open this URL in Chrome:
 http://127.0.0.1:5173
 ```
 
-The canonical local route is also available:
-
-```text
-http://127.0.0.1:5173/favigen
-```
-
 Pick an image, enter an app name, and the browser downloads a ZIP containing the generated `<appname>-favicon` folder.
 
 You can change the port:
@@ -72,25 +70,54 @@ You can change the port:
 npm run gui -- --port 5174
 ```
 
-## Deploy on Vercel
+## Deploy on Cloudflare Workers
 
-This repo includes `vercel.json` for Vercel static hosting. The Vercel project should use:
+Deploy this app with **Workers Static Assets**. In Cloudflare, create a Worker, connect this Git repository, and use these Workers Builds settings:
 
-- Framework preset: Other
-- Build command: leave empty
-- Output directory: `public`
-- Install command: default
+| Setting | Value |
+| --- | --- |
+| Worker name | `favigen` (matches `wrangler.jsonc`) |
+| Custom domain | `favigen.lowkey.tools` (managed by `wrangler.jsonc`) |
+| Production branch | Your release branch |
+| Build command | Leave empty (no build step) |
+| Deploy command | `npx wrangler@4 deploy` |
+| Non-production branch deploy command | `npx wrangler@4 versions upload` |
+| Assets directory | `./public` (set in `wrangler.jsonc`) |
+| Root directory | Leave empty (repository root) |
+| Build environment variable | `SKIP_DEPENDENCY_INSTALL=1` |
 
-Deploy with the Vercel CLI:
+The deployable site is already in `public`. The hosted GUI generates icons and ZIP files in the browser, so no Worker script, Node runtime, or server-side Sharp service is needed. The build variable skips installing the app's CLI dependencies; the deploy command downloads Wrangler when needed.
+
+`wrangler.jsonc` configures `assets.directory` for Workers Static Assets. `public/_headers` supplies the security and cache headers, and `assets.not_found_handling: "404-page"` serves `public/404.html` for unknown paths. HTML routing normalizes `/index.html` to `/`.
+
+For a local Workers preview using Wrangler:
 
 ```sh
-vercel
-vercel --prod
+npx wrangler@4 dev
 ```
 
-The Vercel config serves the app at `/` and also rewrites `/favigen` plus `/favigen/*` to the static files in `public`, so it can sit behind the `lowkey.tools/favigen` proxy rewrite.
+Validate deployment configuration without publishing:
 
-For SEO discovery on the parent domain, keep the root `lowkey.tools` sitemap and robots configuration aware of `https://lowkey.tools/favigen`.
+```sh
+npx wrangler@4 deploy --dry-run
+```
+
+Deploy directly from the CLI:
+
+```sh
+npx wrangler@4 login
+npx wrangler@4 deploy
+```
+
+Wrangler reads the Worker name and assets directory from `wrangler.jsonc`. If you choose another Worker name, update `name` in that file to match. `wrangler deploy` publishes to the configured Worker regardless of your local Git branch. Use `wrangler versions upload` for a preview version, or Workers Builds for automatic deployments from your configured production branch.
+
+`wrangler.jsonc` declares `favigen.lowkey.tools` in `routes` with `custom_domain: true`. On deployment, Cloudflare attaches the domain and provisions its DNS record and TLS certificate; there is no separate dashboard setup step. Deploy to the Cloudflare account with the active `lowkey.tools` zone and permissions to manage the Worker and its custom domain. If the hostname still has a CNAME for another host, remove that conflicting record when you are ready to switch traffic, then deploy.
+
+The `workers.dev` hostname and version preview URLs remain enabled for testing. For an open-source fork, replace the Worker name and custom domain with your own before deploying, or remove `routes` to use only `workers.dev`.
+
+All canonical metadata continues to use `https://favigen.lowkey.tools/`, with discovery files at `/robots.txt`, `/sitemap.xml`, and `/llms.txt`. Submit `https://favigen.lowkey.tools/sitemap.xml` to search engines, and point the Favigen listing on `lowkey.tools` to the subdomain.
+
+References: [Workers Static Assets](https://developers.cloudflare.com/workers/static-assets/), [Workers Builds settings](https://developers.cloudflare.com/workers/ci-cd/builds/configuration/), [build environment](https://developers.cloudflare.com/workers/ci-cd/builds/build-image/), [custom headers](https://developers.cloudflare.com/workers/static-assets/headers/), [custom domains](https://developers.cloudflare.com/workers/configuration/routing/custom-domains/).
 
 ## Generated Files
 

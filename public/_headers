@@ -1,0 +1,71 @@
+# Security and cache policy for Cloudflare Workers Static Assets.
+/*
+  X-Frame-Options: DENY
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=()
+  Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';
+
+/
+  Cache-Control: public, max-age=0, must-revalidate
+
+/index.html
+  Cache-Control: public, max-age=0, must-revalidate
+
+/404.html
+  Cache-Control: public, max-age=0, must-revalidate
+
+/*.js
+  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
+
+/*.css
+  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
+
+/*.svg
+  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
+
+/*.ico
+  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
+
+/*.png
+  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
+
+/*.jpg
+  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
+
+/*.jpeg
+  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
+
+/*.webp
+  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
+
+/*.avif
+  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
+
+/*.gif
+  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
+
+/*.woff
+  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
+
+/*.woff2
+  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
+
+/*.ttf
+  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
+
+/*.eot
+  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
+
+/*.json
+  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
+
+/*.webmanifest
+  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
+
+/*.xml
+  Cache-Control: public, max-age=86400, stale-while-revalidate=604800
+
+/*.txt
+  Cache-Control: public, max-age=86400, stale-while-revalidate=604800

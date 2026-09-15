@@ -2,7 +2,7 @@
   "name": "favicon-generator",
   "version": "1.0.0",
   "description": "A simple Sharp wrapper that generates favicon assets for your apps with a single SVG.",
-  "homepage": "https://lowkey.tools/favigen",
+  "homepage": "https://favigen.lowkey.tools/",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/shrinathprabhu/favicon-generator.git"

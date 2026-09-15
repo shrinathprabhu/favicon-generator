@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://lowkey.tools/favigen/sitemap.xml
+Sitemap: https://favigen.lowkey.tools/sitemap.xml

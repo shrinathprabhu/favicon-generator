@@ -6,6 +6,13 @@ https://owleye.dev
 Developer
 Shrinath Prabhu
 https://shrinath.me
+https://x.com/shrinath_prabhu
+
+Part of lowkey.tools
+https://lowkey.tools
+
+Website
+https://favigen.lowkey.tools/
 
 Source
 https://github.com/shrinathprabhu/favicon-generator

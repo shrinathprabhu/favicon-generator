@@ -127,14 +127,28 @@ code {
 }
 
 footer {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
+  display: grid;
+  gap: 14px;
   margin-top: 22px;
   padding-top: 18px;
   border-top: 1px solid var(--border);
   color: var(--muted);
   font-size: 14px;
+}
+
+.footer-discovery {
+  color: var(--text);
+}
+
+.footer-credits {
+  display: grid;
+  gap: 6px;
+}
+
+.footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 18px;
 }
 
 a {
