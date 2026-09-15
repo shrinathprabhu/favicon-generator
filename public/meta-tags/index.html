@@ -122,10 +122,15 @@
                   <input id="f-favicon" name="favicon" type="url" spellcheck="false" placeholder="/favicon.ico">
                 </div>
                 <div class="field">
-                  <label for="f-themeColor">Theme color</label>
-                  <input id="f-themeColor" name="themeColor" type="text" spellcheck="false" placeholder="#ffffff">
+                  <label for="f-appleTouchIcon">Apple touch icon</label>
+                  <input id="f-appleTouchIcon" name="appleTouchIcon" type="url" spellcheck="false" placeholder="/apple-touch-icon.png">
                 </div>
               </div>
+              <div class="field">
+                <label for="f-themeColor">Theme color</label>
+                <input id="f-themeColor" name="themeColor" type="text" spellcheck="false" placeholder="#ffffff">
+              </div>
+              <p class="hint">No favicon yet? <a href="/">Generate a full set</a> from one SVG.</p>
             </div>
           </details>
 
@@ -216,6 +221,17 @@
           <section class="result-block" aria-labelledby="checks-heading">
             <h2 id="checks-heading">Checks <span class="check-summary" id="check-summary"></span></h2>
             <ul class="checks" id="checks"></ul>
+          </section>
+
+          <section class="result-block" aria-labelledby="coverage-heading">
+            <h2 id="coverage-heading">Tag checklist <span class="check-summary" id="coverage-summary"></span></h2>
+            <p class="hint" id="coverage-note"></p>
+            <ul class="coverage" id="coverage"></ul>
+          </section>
+
+          <section class="result-block" aria-labelledby="favicon-heading">
+            <h2 id="favicon-heading">Favicon</h2>
+            <div class="favicon-preview" id="favicon-preview"></div>
           </section>
 
           <section class="result-block" aria-labelledby="preview-heading">

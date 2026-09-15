@@ -1,7 +1,7 @@
 // Meta Tags: fetch a page's <head>, edit its SEO/Open Graph/X tags, preview
 // them on common platforms, validate lengths, and generate code to paste.
 
-const FIELDS = ['title', 'description', 'canonical', 'favicon', 'themeColor', 'ogTitle', 'ogDescription', 'ogImage', 'ogImageAlt', 'ogSiteName', 'ogType', 'ogUrl', 'twitterCard', 'twitterSite', 'twitterCreator', 'twitterTitle', 'twitterDescription', 'twitterImage'];
+const FIELDS = ['title', 'description', 'canonical', 'favicon', 'appleTouchIcon', 'themeColor', 'ogTitle', 'ogDescription', 'ogImage', 'ogImageAlt', 'ogSiteName', 'ogType', 'ogUrl', 'twitterCard', 'twitterSite', 'twitterCreator', 'twitterTitle', 'twitterDescription', 'twitterImage'];
 
 // min: shorter than this looks thin. max: the recommended ceiling. hard: platforms cut it off.
 // px: rendered width Google allows before truncating (Arial at the size Google uses).
@@ -20,6 +20,7 @@ const SAMPLE = {
   description: 'See how your link looks on Google, X, Facebook, LinkedIn, and Slack. Edit the title, description, and image, then copy ready-to-paste tags.',
   canonical: 'https://favigen.lowkey.tools/meta-tags/',
   favicon: 'https://favigen.lowkey.tools/favicon.svg',
+  appleTouchIcon: 'https://favigen.lowkey.tools/apple-touch-icon.png',
   themeColor: '',
   ogTitle: '',
   ogDescription: '',
@@ -108,6 +109,7 @@ function effective() {
     description: state.description.trim(),
     canonical: state.canonical.trim(),
     favicon: state.favicon.trim(),
+    appleTouchIcon: state.appleTouchIcon.trim(),
     themeColor: state.themeColor.trim(),
     ogTitle,
     ogDescription,
@@ -136,7 +138,9 @@ function update() {
   updatePlaceholders(eff);
   updateCounters();
   renderPreviews(eff);
+  renderFavicon(eff);
   renderChecks(eff);
+  renderCoverage(eff);
   renderCode();
 }
 
@@ -305,6 +309,7 @@ function analyzePasted() {
     return;
   }
   const base = parseInputUrl($('#paste-base').value);
+  if (base) urlInput.value = base.href;
   loadSource(html, base?.href || '', base ? '' : 'No page URL given, so relative links stay relative.');
   $('#paste-panel').hidden = true;
   $('#local-help').hidden = true;
@@ -369,8 +374,10 @@ function loadSource(html, baseHref, note = '') {
     type: link.getAttribute('type') || '',
     sizes: link.getAttribute('sizes') || ''
   }));
+  links.forEach((link) => { link.url = resolve(link.href); });
   const icons = links.filter((link) => link.rel.includes('icon'));
   const icon = icons.find((link) => link.type === 'image/svg+xml') || icons.find((link) => /32|48|any/.test(link.sizes)) || icons[0];
+  const appleIcon = links.find((link) => link.rel.includes('apple-touch-icon') || link.rel.includes('apple-touch-icon-precomposed'));
 
   source = {
     title: doc.querySelector('title')?.textContent.trim() || '',
@@ -380,6 +387,7 @@ function loadSource(html, baseHref, note = '') {
     hasViewport: Boolean(get('viewport')),
     hasCharset: metas.some((meta) => meta.key === 'charset' || /charset/i.test(meta.value)),
     hasIcon: Boolean(icon),
+    faviconFallback: !icon && Boolean(base),
     base: base?.href || ''
   };
 
@@ -388,6 +396,7 @@ function loadSource(html, baseHref, note = '') {
     description: get('description'),
     canonical: resolve(links.find((link) => link.rel.includes('canonical'))?.href),
     favicon: icon ? resolve(icon.href) : base ? new URL('/favicon.ico', base).href : '',
+    appleTouchIcon: appleIcon ? resolve(appleIcon.href) : '',
     themeColor: get('theme-color'),
     ogTitle: get('og:title'),
     ogDescription: get('og:description'),
@@ -407,16 +416,6 @@ function loadSource(html, baseHref, note = '') {
   if (!metaForm.querySelector(`#f-ogType option[value="${CSS.escape(state.ogType)}"]`)) {
     $('#f-ogType').append(new Option(state.ogType, state.ogType));
   }
-
-  source.found = {
-    description: Boolean(state.description),
-    canonical: Boolean(state.canonical),
-    'og:title': Boolean(state.ogTitle),
-    'og:description': Boolean(state.ogDescription),
-    'og:image': Boolean(state.ogImage),
-    'og:url': Boolean(state.ogUrl),
-    'twitter:card': Boolean(get('twitter:card'))
-  };
 
   pageUrl = base?.href || '';
   renderRawTags();
@@ -469,14 +468,27 @@ function probeImage(url) {
   img.referrerPolicy = 'no-referrer';
   img.onload = () => {
     Object.assign(probe, { status: 'ok', width: img.naturalWidth, height: img.naturalHeight });
-    if (effective().ogImage === url || effective().twitterImage === url) update();
+    if (isInUse(url)) update();
   };
   img.onerror = () => {
     probe.status = 'error';
-    if (effective().ogImage === url || effective().twitterImage === url) update();
+    if (isInUse(url)) update();
   };
   img.src = url;
   return probe;
+}
+
+// The editor guesses /favicon.ico when a page declares no icon. Only keep that
+// guess in the generated code if the file actually exists.
+function codeFavicon(eff) {
+  if (!eff.favicon) return '';
+  const guessed = source?.faviconFallback && state.favicon.trim() === new URL('/favicon.ico', source.base).href;
+  return guessed && imageProbes.get(eff.favicon)?.status === 'error' ? '' : eff.favicon;
+}
+
+function isInUse(url) {
+  const eff = effective();
+  return [eff.ogImage, eff.twitterImage, eff.favicon, eff.appleTouchIcon].includes(url) || Boolean(source?.links.some((link) => link.url === url));
 }
 
 /* ---------- previews ---------- */
@@ -528,12 +540,12 @@ function renderPreviews(eff) {
   const siteName = eff.ogSiteName || domain;
   const breadcrumb = url ? [url.origin, ...url.pathname.split('/').filter(Boolean)].join(' › ') : 'https://example.com';
   const titleFallback = 'Add a title';
-  const favicon = eff.favicon ? h('img', { src: eff.favicon, alt: '', referrerpolicy: 'no-referrer' }) : null;
+  const favicon = eff.favicon ? iconImage(eff.favicon, 16) : null;
 
   const google = card('Google',
     h('div', { class: 'pv-google' },
       h('div', { class: 'pv-google-site' },
-        h('span', { class: 'pv-google-icon' }, eff.favicon ? h('img', { src: eff.favicon, alt: '', referrerpolicy: 'no-referrer' }) : null),
+        h('span', { class: 'pv-google-icon' }, eff.favicon ? iconImage(eff.favicon, 18) : null),
         h('span', {}, h('div', { class: 'pv-google-name' }, siteName), h('div', { class: 'pv-google-url' }, breadcrumb))
       ),
       h('h3', { class: 'pv-google-title' }, truncateToWidth(eff.title || titleFallback, LIMITS.title.font, LIMITS.title.px)),
@@ -627,13 +639,7 @@ function renderChecks(eff) {
     add('bad', `theme-color "${eff.themeColor}" is not a valid CSS color.`);
   }
 
-  if (source) {
-    const missing = Object.entries(source.found).filter(([, found]) => !found).map(([tag]) => tag);
-    if (missing.length) add('warn', `The fetched page is missing ${formatList(missing)}. The code below fills them in.`);
-    if (!source.hasViewport) add('warn', 'The page has no viewport meta tag, so it may not render well on phones.');
-    if (!source.lang) add('warn', 'The <html> element has no lang attribute.');
-    if (!source.hasIcon) add('warn', 'No favicon link found. Google shows the favicon next to search results.');
-  }
+  iconChecks(add, eff);
 
   const order = { bad: 0, warn: 1, ok: 2 };
   checks.sort((a, b) => order[a.tone] - order[b.tone]);
@@ -647,6 +653,179 @@ function renderChecks(eff) {
     counts.warn ? h('span', { 'data-tone': 'warn' }, `${counts.warn} to review`) : null,
     counts.bad ? h('span', { 'data-tone': 'bad' }, `${counts.bad} to fix`) : null
   ].filter(Boolean));
+}
+
+function iconChecks(add, eff) {
+  if (!eff.favicon) {
+    add('bad', 'No favicon. Browsers, bookmarks, and Google search results show it next to your page.');
+  } else {
+    const probe = probeImage(eff.favicon);
+    const isSvg = /\.svg(\?|#|$)/i.test(eff.favicon);
+    if (probe?.status === 'error') {
+      add('bad', source?.faviconFallback
+        ? 'No <link rel="icon"> on the page, and /favicon.ico does not exist.'
+        : 'The favicon could not be loaded.');
+    } else if (probe?.status === 'ok') {
+      if (source?.faviconFallback) add('warn', 'No <link rel="icon"> on the page. Browsers found /favicon.ico by convention, but declare it explicitly.');
+      if (!isSvg && probe.width !== probe.height) add('warn', `Favicon is ${probe.width}×${probe.height}. Icons should be square.`);
+      else if (!isSvg && probe.width < 48) add('warn', `Favicon is ${probe.width}×${probe.height}. Google asks for at least 48×48.`);
+      else add('ok', `Favicon loads${isSvg ? ' (SVG)' : ` (${probe.width}×${probe.height})`}.`);
+    }
+  }
+
+  if (!eff.appleTouchIcon) {
+    add('warn', 'No apple-touch-icon. iPhones and iPads will use a screenshot of the page on the home screen.');
+  } else {
+    const probe = probeImage(eff.appleTouchIcon);
+    if (probe?.status === 'error') add('bad', 'The apple-touch-icon could not be loaded.');
+    else if (probe?.status === 'ok' && (probe.width !== 180 || probe.height !== 180)) add('warn', `apple-touch-icon is ${probe.width}×${probe.height}. Use 180×180.`);
+    else if (probe?.status === 'ok') add('ok', 'apple-touch-icon is 180×180.');
+  }
+}
+
+/* ---------- tag checklist ---------- */
+
+function renderCoverage(eff) {
+  const hasMeta = (key) => (source ? source.metas.some((meta) => meta.key.toLowerCase() === key && meta.value) : null);
+  const hasLink = (...rels) => (source ? source.links.some((link) => rels.some((rel) => link.rel.includes(rel))) : null);
+
+  // page: is it in the fetched HTML (null when nothing was fetched).
+  // set: will the generated code include it (null when this tool cannot add it).
+  const items = [
+    { tag: '<title>', level: 'required', page: source ? Boolean(source.title) : null, set: Boolean(eff.title) },
+    { tag: 'meta description', level: 'required', page: hasMeta('description'), set: Boolean(eff.description) },
+    { tag: 'meta charset', level: 'required', page: source ? source.hasCharset : null, set: null },
+    { tag: 'meta viewport', level: 'required', page: source ? source.hasViewport : null, set: null },
+    { tag: 'link rel="icon"', level: 'required', page: hasLink('icon'), set: Boolean(codeFavicon(eff)) },
+    { tag: 'og:title', level: 'required', page: hasMeta('og:title'), set: Boolean(eff.ogTitle) },
+    { tag: 'og:description', level: 'required', page: hasMeta('og:description'), set: Boolean(eff.ogDescription) },
+    { tag: 'og:image', level: 'required', page: source ? ['og:image', 'og:image:url', 'og:image:secure_url'].some(hasMeta) : null, set: Boolean(eff.ogImage) },
+    { tag: 'twitter:card', level: 'required', page: hasMeta('twitter:card'), set: true },
+    { tag: 'html lang', level: 'recommended', page: source ? Boolean(source.lang) : null, set: null },
+    { tag: 'link rel="canonical"', level: 'recommended', page: hasLink('canonical'), set: Boolean(eff.canonical) },
+    { tag: 'apple-touch-icon', level: 'recommended', page: hasLink('apple-touch-icon', 'apple-touch-icon-precomposed'), set: Boolean(eff.appleTouchIcon) },
+    { tag: 'og:url', level: 'recommended', page: hasMeta('og:url'), set: /^https?:\/\//i.test(eff.ogUrl) },
+    { tag: 'og:type', level: 'recommended', page: hasMeta('og:type'), set: true },
+    { tag: 'og:site_name', level: 'recommended', page: hasMeta('og:site_name'), set: Boolean(eff.ogSiteName) },
+    { tag: 'og:image:alt', level: 'recommended', page: hasMeta('og:image:alt'), set: Boolean(eff.ogImage && eff.ogImageAlt) },
+    { tag: 'theme-color', level: 'optional', page: hasMeta('theme-color'), set: Boolean(eff.themeColor) },
+    { tag: 'link rel="manifest"', level: 'optional', page: hasLink('manifest'), set: null },
+    { tag: 'twitter:site', level: 'optional', page: hasMeta('twitter:site'), set: Boolean(eff.twitterSite) }
+  ];
+
+  const rows = [];
+  let present = 0;
+  let missingRequired = 0;
+
+  for (const item of items) {
+    let tone;
+    let status;
+
+    if (item.page === true) {
+      tone = 'ok';
+      status = 'On the page';
+    } else if (item.page === false) {
+      if (item.set) {
+        tone = 'warn';
+        status = 'Missing · added in the code below';
+      } else {
+        tone = item.level === 'required' ? 'bad' : item.level === 'recommended' ? 'warn' : '';
+        status = item.set === null ? 'Missing · add it to your page' : 'Missing · fill it in on the left';
+      }
+    } else if (item.set === null) {
+      continue;
+    } else if (item.set) {
+      tone = 'ok';
+      status = 'Set';
+    } else {
+      tone = item.level === 'required' ? 'bad' : item.level === 'recommended' ? 'warn' : '';
+      status = 'Not set';
+    }
+
+    if (tone === 'ok') present += 1;
+    if (tone === 'bad') missingRequired += 1;
+
+    rows.push(h('li', { 'data-tone': tone },
+      h('code', {}, item.tag),
+      h('span', { class: `level level-${item.level}` }, item.level),
+      h('span', { class: 'coverage-status' }, status)
+    ));
+  }
+
+  $('#coverage').replaceChildren(...rows);
+  $('#coverage-note').textContent = source
+    ? 'Based on the HTML that was fetched. Tags filled in on the left are added to the code below.'
+    : 'Fetch a page to check which tags it already has. Until then, this reflects the fields on the left.';
+  $('#coverage-summary').replaceChildren(...[
+    h('span', { 'data-tone': 'ok' }, `${present} of ${rows.length} present`),
+    missingRequired ? h('span', { 'data-tone': 'bad' }, `${missingRequired} required missing`) : null
+  ].filter(Boolean));
+}
+
+/* ---------- favicon preview ---------- */
+
+function iconImage(url, size, className = '') {
+  const probe = url ? probeImage(url) : null;
+  if (!url || probe?.status === 'error') {
+    return h('span', { class: `icon-missing ${className}`.trim(), title: url ? 'Could not load' : 'No icon' });
+  }
+  const img = h('img', { src: url, alt: '', width: size, height: size, referrerpolicy: 'no-referrer', class: className || null });
+  return img;
+}
+
+function renderFavicon(eff) {
+  const container = $('#favicon-preview');
+  const url = safeUrl(eff.canonical || eff.ogUrl);
+  const tabTitle = eff.title || url?.hostname || 'New Tab';
+  const appName = eff.ogSiteName || url?.hostname.replace(/^www\./, '').split('.')[0] || 'App';
+
+  const tab = (theme) => h('div', { class: `fv-browser fv-${theme}` },
+    h('div', { class: 'fv-tabs' },
+      h('div', { class: 'fv-tab fv-tab-active' }, iconImage(eff.favicon, 16, 'fv-tab-icon'), h('span', { class: 'fv-tab-title' }, tabTitle), h('span', { class: 'fv-tab-close', 'aria-hidden': 'true' }, '×')),
+      h('div', { class: 'fv-tab' }, h('span', { class: 'fv-tab-dot' }), h('span', { class: 'fv-tab-title' }, 'Another tab'))
+    ),
+    h('div', { class: 'fv-address' }, url ? url.host + url.pathname : 'example.com')
+  );
+
+  const sizes = h('div', { class: 'fv-sizes' },
+    ...['light', 'dark'].map((theme) => h('div', { class: `fv-size-row fv-${theme}` },
+      ...[16, 32, 48].map((size) => h('figure', { class: 'fv-size' }, iconImage(eff.favicon, size), h('figcaption', {}, `${size}px`)))
+    ))
+  );
+
+  const home = h('div', { class: 'fv-home' },
+    h('div', { class: 'fv-home-app' },
+      eff.appleTouchIcon
+        ? iconImage(eff.appleTouchIcon, 60, 'fv-home-icon')
+        : h('span', { class: 'fv-home-icon fv-home-fallback' }, 'No icon'),
+      h('span', { class: 'fv-home-label' }, appName)
+    )
+  );
+
+  const blocks = [
+    card('Browser tabs', h('div', { class: 'fv-browsers' }, tab('light'), tab('dark'))),
+    card('Small sizes', sizes),
+    card('iOS home screen', home)
+  ];
+
+  const found = source ? source.links.filter((link) => link.rel.some((rel) => /icon|manifest/.test(rel))) : [];
+  if (found.length) {
+    blocks.push(card(`Icons on the page (${found.length})`, h('ul', { class: 'fv-list' },
+      ...found.map((link) => {
+        const isManifest = link.rel.includes('manifest');
+        const probe = !isManifest && link.url ? probeImage(link.url) : null;
+        const detail = [link.sizes && `sizes="${link.sizes}"`, link.type].filter(Boolean).join(' · ');
+        const status = isManifest ? 'Web app manifest' : probe?.status === 'ok' ? `${probe.width}×${probe.height}` : probe?.status === 'error' ? 'Failed to load' : 'Loading…';
+        return h('li', { 'data-tone': probe?.status === 'error' ? 'bad' : '' },
+          isManifest ? h('span', { class: 'icon-missing fv-list-icon' }) : iconImage(link.url, 32, 'fv-list-icon'),
+          h('span', { class: 'fv-list-text' }, h('code', {}, `rel="${link.rel.join(' ')}"`), detail ? h('span', { class: 'hint' }, detail) : null, h('span', { class: 'fv-list-url' }, link.url || link.href)),
+          h('span', { class: 'fv-list-status' }, status)
+        );
+      })
+    )));
+  }
+
+  container.replaceChildren(...blocks);
 }
 
 function lengthCheck(add, label, value, key, required) {
@@ -692,11 +871,6 @@ function imageChecks(add, label, url, required) {
   }
 }
 
-function formatList(items) {
-  if (items.length < 2) return items.join('');
-  return `${items.slice(0, -1).join(', ')} and ${items.at(-1)}`;
-}
-
 /* ---------- code generation ---------- */
 
 function renderCode() {
@@ -733,7 +907,8 @@ function htmlCode(eff) {
       eff.title ? `<title>${attr(eff.title)}</title>` : null,
       meta('name', 'description', eff.description),
       eff.canonical ? `<link rel="canonical" href="${attr(eff.canonical)}">` : null,
-      eff.favicon ? `<link rel="icon" href="${attr(eff.favicon)}">` : null,
+      codeFavicon(eff) ? `<link rel="icon" href="${attr(codeFavicon(eff))}">` : null,
+      eff.appleTouchIcon ? `<link rel="apple-touch-icon" href="${attr(eff.appleTouchIcon)}">` : null,
       meta('name', 'theme-color', eff.themeColor)
     ]],
     ['<!-- Open Graph -->', [
@@ -775,7 +950,10 @@ function nextCode(eff) {
   if (eff.title) push(1, `title: ${str(eff.title)},`);
   if (eff.description) push(1, `description: ${str(eff.description)},`);
   if (eff.canonical) push(1, `alternates: { canonical: ${str(eff.canonical)} },`);
-  if (eff.favicon) push(1, `icons: { icon: ${str(eff.favicon)} },`);
+  if (codeFavicon(eff) || eff.appleTouchIcon) {
+    const icons = [codeFavicon(eff) && `icon: ${str(codeFavicon(eff))}`, eff.appleTouchIcon && `apple: ${str(eff.appleTouchIcon)}`].filter(Boolean);
+    push(1, `icons: { ${icons.join(', ')} },`);
+  }
 
   push(1, 'openGraph: {');
   // Next.js only accepts these Open Graph types.

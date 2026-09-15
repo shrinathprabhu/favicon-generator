@@ -40,7 +40,9 @@ URL: https://favigen.lowkey.tools/meta-tags/
 
 - Fetches a URL (including localhost, through a bookmarklet, pasted HTML, or the local GUI) and reads its title, description, canonical, Open Graph, and X tags.
 - Previews the link on Google, X, Facebook, LinkedIn, and Slack, and updates live while editing.
-- Checks title and description length (characters and Google pixel width), image size and aspect ratio, and missing tags.
+- Checks title and description length (characters and Google pixel width), image size and aspect ratio, and favicon and apple-touch-icon size.
+- Lists required, recommended, and optional tags as present, missing, or added by the generated code.
+- Previews the favicon in light and dark browser tabs, at small sizes, and on the iOS home screen.
 - Generates HTML meta tags or a Next.js metadata export to paste into a site.
 
 ## CLI usage
