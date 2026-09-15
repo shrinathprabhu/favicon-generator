@@ -1,0 +1,328 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>OG Image Generator - Design 1200x630 social share images</title>
+    <meta name="description" content="Free Open Graph image generator. Pick a layout, a Fontsource font, colors, and a logo, then export a lightweight 1200x630 PNG, JPG, or SVG for social sharing.">
+    <meta name="keywords" content="OG image generator, Open Graph image, social share image, Twitter card image, 1200x630 image, og:image maker, social preview image">
+    <meta name="author" content="Shrinath Prabhu">
+    <meta name="robots" content="index, follow, max-image-preview:large">
+    <link rel="canonical" href="https://favigen.lowkey.tools/og-image/">
+    <link rel="icon" href="/favicon.ico" sizes="any">
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+    <link rel="manifest" href="/site.webmanifest">
+    <meta name="theme-color" content="#f7f7f4" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#171717" media="(prefers-color-scheme: dark)">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Favicon Generator">
+    <meta property="og:title" content="OG Image Generator">
+    <meta property="og:description" content="Design clean 1200x630 social share images with real fonts, colors, and your logo. Export PNG, JPG, or SVG.">
+    <meta property="og:url" content="https://favigen.lowkey.tools/og-image/">
+    <meta property="og:image" content="https://favigen.lowkey.tools/og-image.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="Favicon Generator - tools for favicons, OG images, and meta tags.">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="OG Image Generator">
+    <meta name="twitter:description" content="Design clean 1200x630 social share images with real fonts, colors, and your logo.">
+    <meta name="twitter:image" content="https://favigen.lowkey.tools/og-image.png">
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+    <link rel="preconnect" href="https://api.fontsource.org" crossorigin>
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="stylesheet" href="/tools.css">
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "OG Image Generator",
+        "url": "https://favigen.lowkey.tools/og-image/",
+        "applicationCategory": "DesignApplication",
+        "operatingSystem": "Any",
+        "isAccessibleForFree": true,
+        "description": "Design 1200x630 Open Graph images with Fontsource fonts, colors, layouts, and a logo, then export PNG, JPG, or SVG.",
+        "isPartOf": { "@type": "WebSite", "name": "lowkey.tools", "url": "https://lowkey.tools" },
+        "author": { "@type": "Person", "name": "Shrinath Prabhu", "url": "https://shrinath.me" },
+        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+      }
+    </script>
+  </head>
+  <body class="tool-page">
+    <main class="tool-shell">
+      <nav class="tool-nav" aria-label="Tools">
+        <a href="/">Favicon</a>
+        <a href="/og-image/" aria-current="page">OG Image</a>
+        <a href="/meta-tags/">Meta Tags</a>
+      </nav>
+
+      <header class="tool-header">
+        <img class="logo" src="/logo.svg" alt="" width="52" height="52">
+        <div>
+          <h1>OG Image Generator</h1>
+          <p>Design a clean, readable 1200&times;630 share image. Everything renders in your browser.</p>
+        </div>
+      </header>
+
+      <div class="og-workspace">
+        <section class="og-stage" aria-label="Preview and export">
+          <div class="og-canvas-frame">
+            <canvas id="og-canvas" width="1200" height="630" role="img" aria-label="Open Graph image preview"></canvas>
+          </div>
+          <div class="og-meta">
+            <span>1200 &times; 630 px &middot; 1.91:1</span>
+            <span id="og-status" class="tool-status" role="status" aria-live="polite"></span>
+          </div>
+
+          <div class="og-export">
+            <div class="field">
+              <span class="field-label">Export format</span>
+              <div class="segmented" role="radiogroup" aria-label="Export format">
+                <label><input type="radio" name="format" value="png"><span>PNG<small data-size="png">&hellip;</small></span></label>
+                <label><input type="radio" name="format" value="jpg"><span>JPG<small data-size="jpg">&hellip;</small></span></label>
+                <label><input type="radio" name="format" value="svg"><span>SVG<small data-size="svg">&hellip;</small></span></label>
+              </div>
+            </div>
+            <div class="field" data-show-for-format="png">
+              <span class="field-label">PNG compression</span>
+              <div class="segmented" role="radiogroup" aria-label="PNG compression">
+                <label><input type="radio" name="pngMode" value="compact"><span>Compact &middot; 256 colors</span></label>
+                <label><input type="radio" name="pngMode" value="lossless"><span>Lossless</span></label>
+              </div>
+            </div>
+            <div class="field" data-show-for-format="jpg">
+              <label for="quality">JPG quality <output data-for="quality"></output></label>
+              <input id="quality" name="quality" type="range" min="50" max="100" step="1" form="og-form">
+            </div>
+            <div data-show-for-format="svg" class="field">
+              <label class="check"><input type="checkbox" name="embedFonts" form="og-form"> Embed fonts in the SVG</label>
+              <span class="hint">Most social networks only accept PNG or JPG for og:image. Use SVG for editing or archiving.</span>
+            </div>
+            <div class="og-export-actions">
+              <button type="button" class="button" id="og-download">Download</button>
+              <button type="button" class="button secondary" id="og-copy">Copy PNG</button>
+            </div>
+          </div>
+        </section>
+
+        <form class="og-controls" id="og-form" autocomplete="off">
+          <details class="panel-section" open>
+            <summary>Content</summary>
+            <div class="panel-body">
+              <div class="field">
+                <label for="title">Title <span class="hint">Required</span></label>
+                <textarea id="title" name="title" rows="2" maxlength="140" required></textarea>
+              </div>
+              <div class="field">
+                <label for="description">Description <span class="hint">Optional</span></label>
+                <textarea id="description" name="description" rows="2" maxlength="220"></textarea>
+              </div>
+              <div class="row">
+                <div class="field">
+                  <label for="eyebrow">Eyebrow</label>
+                  <input id="eyebrow" name="eyebrow" type="text" maxlength="48" placeholder="Announcement">
+                </div>
+                <div class="field">
+                  <label for="brand">Brand name</label>
+                  <input id="brand" name="brand" type="text" maxlength="40" placeholder="Acme">
+                </div>
+              </div>
+              <div class="row">
+                <div class="field">
+                  <label for="footer">Footer</label>
+                  <input id="footer" name="footer" type="text" maxlength="60" placeholder="by @handle">
+                </div>
+                <div class="field">
+                  <label for="url">Website</label>
+                  <input id="url" name="url" type="text" maxlength="60" placeholder="example.com">
+                </div>
+              </div>
+            </div>
+          </details>
+
+          <details class="panel-section" open>
+            <summary>Layout &amp; theme</summary>
+            <div class="panel-body">
+              <div class="layout-options" role="radiogroup" aria-label="Layout">
+                <label class="layout-option">
+                  <input type="radio" name="layout" value="spotlight">
+                  <span>
+                    <svg viewBox="0 0 120 63" aria-hidden="true"><rect x="10" y="9" width="8" height="8" rx="2" fill="currentColor"/><rect x="21" y="11" width="18" height="4" rx="2" fill="currentColor" opacity=".6"/><rect x="10" y="25" width="80" height="7" rx="2" fill="currentColor"/><rect x="10" y="35" width="56" height="7" rx="2" fill="currentColor"/><rect x="10" y="52" width="30" height="3" rx="1.5" fill="currentColor" opacity=".5"/></svg>
+                    Spotlight
+                  </span>
+                </label>
+                <label class="layout-option">
+                  <input type="radio" name="layout" value="centered">
+                  <span>
+                    <svg viewBox="0 0 120 63" aria-hidden="true"><rect x="56" y="8" width="8" height="8" rx="2" fill="currentColor"/><rect x="18" y="24" width="84" height="7" rx="2" fill="currentColor"/><rect x="30" y="34" width="60" height="7" rx="2" fill="currentColor"/><rect x="36" y="46" width="48" height="3" rx="1.5" fill="currentColor" opacity=".5"/></svg>
+                    Centered
+                  </span>
+                </label>
+                <label class="layout-option">
+                  <input type="radio" name="layout" value="split">
+                  <span>
+                    <svg viewBox="0 0 120 63" aria-hidden="true"><rect x="10" y="10" width="18" height="4" rx="2" fill="currentColor" opacity=".6"/><rect x="10" y="24" width="56" height="7" rx="2" fill="currentColor"/><rect x="10" y="34" width="40" height="7" rx="2" fill="currentColor"/><rect x="10" y="52" width="26" height="3" rx="1.5" fill="currentColor" opacity=".5"/><rect x="80" y="16" width="30" height="30" rx="8" fill="currentColor"/></svg>
+                    Split
+                  </span>
+                </label>
+                <label class="layout-option">
+                  <input type="radio" name="layout" value="editorial">
+                  <span>
+                    <svg viewBox="0 0 120 63" aria-hidden="true"><rect x="4" y="4" width="112" height="55" fill="none" stroke="currentColor" stroke-width="1" opacity=".5"/><rect x="12" y="11" width="8" height="1.5" fill="currentColor"/><rect x="23" y="10" width="20" height="3" rx="1.5" fill="currentColor" opacity=".6"/><rect x="12" y="24" width="80" height="7" rx="2" fill="currentColor"/><rect x="12" y="34" width="50" height="7" rx="2" fill="currentColor"/><rect x="12" y="46" width="96" height="1" fill="currentColor" opacity=".5"/><rect x="12" y="50" width="22" height="3" rx="1.5" fill="currentColor" opacity=".6"/></svg>
+                    Editorial
+                  </span>
+                </label>
+              </div>
+              <div class="field">
+                <span class="field-label">Theme</span>
+                <div class="swatches" id="theme-swatches"></div>
+              </div>
+            </div>
+          </details>
+
+          <details class="panel-section" open>
+            <summary>Typography</summary>
+            <div class="panel-body">
+              <div class="field">
+                <span class="field-label">Font pairings</span>
+                <div class="chips" id="pairing-chips"></div>
+              </div>
+
+              <div class="field">
+                <span class="field-label" id="heading-font-label">Heading font</span>
+                <div class="font-picker" data-font-key="headingFont" data-weight-key="headingWeight" data-labelledby="heading-font-label"></div>
+              </div>
+              <div class="row">
+                <div class="field">
+                  <label for="headingWeight">Weight</label>
+                  <select id="headingWeight" name="headingWeight"></select>
+                </div>
+                <div class="field">
+                  <label for="headingSize">Size <output data-for="headingSize"></output></label>
+                  <input id="headingSize" name="headingSize" type="range" min="36" max="120" step="1">
+                </div>
+              </div>
+              <div class="row">
+                <div class="field">
+                  <label for="tracking">Letter spacing <output data-for="tracking"></output></label>
+                  <input id="tracking" name="tracking" type="range" min="-8" max="10" step="0.5">
+                </div>
+                <div class="field">
+                  <label for="lineHeight">Line height <output data-for="lineHeight"></output></label>
+                  <input id="lineHeight" name="lineHeight" type="range" min="0.9" max="1.5" step="0.02">
+                </div>
+              </div>
+              <label class="check"><input type="checkbox" name="autoFit"> Shrink title to fit</label>
+
+              <div class="field">
+                <span class="field-label" id="body-font-label">Body font</span>
+                <div class="font-picker" data-font-key="bodyFont" data-weight-key="bodyWeight" data-labelledby="body-font-label"></div>
+              </div>
+              <div class="row">
+                <div class="field">
+                  <label for="bodyWeight">Weight</label>
+                  <select id="bodyWeight" name="bodyWeight"></select>
+                </div>
+                <div class="field">
+                  <label for="bodySize">Size <output data-for="bodySize"></output></label>
+                  <input id="bodySize" name="bodySize" type="range" min="18" max="44" step="1">
+                </div>
+              </div>
+            </div>
+          </details>
+
+          <details class="panel-section">
+            <summary>Colors &amp; background</summary>
+            <div class="panel-body">
+              <div class="field">
+                <span class="field-label">Background</span>
+                <div class="segmented" role="radiogroup" aria-label="Background style">
+                  <label><input type="radio" name="bgType" value="solid"><span>Solid</span></label>
+                  <label><input type="radio" name="bgType" value="linear"><span>Gradient</span></label>
+                  <label><input type="radio" name="bgType" value="glow"><span>Glow</span></label>
+                  <label><input type="radio" name="bgType" value="aurora"><span>Aurora</span></label>
+                </div>
+              </div>
+              <div class="color-grid">
+                <div class="field" data-color="bg"><span class="field-label">Background</span></div>
+                <div class="field" data-color="bg2" data-hide-for-bg="solid"><span class="field-label">Glow / gradient</span></div>
+                <div class="field" data-color="text"><span class="field-label">Title</span></div>
+                <div class="field" data-color="muted"><span class="field-label">Body</span></div>
+                <div class="field" data-color="accent"><span class="field-label">Accent</span></div>
+              </div>
+              <div class="field" data-show-for-bg="linear">
+                <label for="angle">Gradient angle <output data-for="angle"></output></label>
+                <input id="angle" name="angle" type="range" min="0" max="360" step="5">
+              </div>
+              <div class="field">
+                <span class="field-label">Pattern</span>
+                <div class="segmented" role="radiogroup" aria-label="Pattern">
+                  <label><input type="radio" name="pattern" value="none"><span>None</span></label>
+                  <label><input type="radio" name="pattern" value="grid"><span>Grid</span></label>
+                  <label><input type="radio" name="pattern" value="dots"><span>Dots</span></label>
+                </div>
+              </div>
+              <div class="row">
+                <div class="field" data-hide-for-pattern="none">
+                  <label for="patternOpacity">Pattern strength <output data-for="patternOpacity"></output></label>
+                  <input id="patternOpacity" name="patternOpacity" type="range" min="2" max="30" step="1">
+                </div>
+                <div class="field">
+                  <label for="padding">Padding <output data-for="padding"></output></label>
+                  <input id="padding" name="padding" type="range" min="48" max="120" step="2">
+                </div>
+              </div>
+            </div>
+          </details>
+
+          <details class="panel-section">
+            <summary>Logo</summary>
+            <div class="panel-body">
+              <div class="segmented" role="radiogroup" aria-label="Logo">
+                <label><input type="radio" name="logoMode" value="none"><span>None</span></label>
+                <label><input type="radio" name="logoMode" value="monogram"><span>Monogram</span></label>
+                <label><input type="radio" name="logoMode" value="upload"><span>Upload</span></label>
+              </div>
+              <div class="field" data-show-for-logo="upload">
+                <label for="logoFile">Logo image <span class="hint">SVG, PNG, WebP, JPG &middot; up to 2 MB</span></label>
+                <input id="logoFile" type="file" accept=".svg,.png,.webp,.jpg,.jpeg,image/svg+xml,image/png,image/webp,image/jpeg">
+              </div>
+              <label class="check" data-show-for-logo="upload"><input type="checkbox" name="logoPlate"> Place logo on a plate</label>
+              <div class="row" data-hide-for-logo="none">
+                <div class="field">
+                  <label for="logoSize">Size <output data-for="logoSize"></output></label>
+                  <input id="logoSize" name="logoSize" type="range" min="36" max="120" step="2">
+                </div>
+                <div class="field">
+                  <label for="logoRadius">Corner radius <output data-for="logoRadius"></output></label>
+                  <input id="logoRadius" name="logoRadius" type="range" min="0" max="50" step="1">
+                </div>
+              </div>
+            </div>
+          </details>
+
+          <div class="panel-section">
+            <div class="panel-body">
+              <p class="hint">Your design is saved in this browser. Fonts are loaded from <a href="https://fontsource.org/" rel="noopener noreferrer">Fontsource</a>.</p>
+              <div><button type="button" class="button secondary small" id="og-reset">Reset to defaults</button></div>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <footer>
+        <p class="footer-discovery">Ready to ship it? Preview your tags on Google, X, Facebook, and more with <a href="/meta-tags/">Meta Tags</a>.</p>
+        <div class="footer-credits">
+          <p>A small tool in the <a href="https://lowkey.tools">lowkey.tools</a> collection.</p>
+          <p>Made by <a href="https://shrinath.me" rel="author">Shrinath Prabhu</a>, from the makers of <a href="https://owleye.dev">OwlEye Analytics</a>.</p>
+        </div>
+        <nav class="footer-links" aria-label="Project links">
+          <a href="https://github.com/shrinathprabhu/favicon-generator" rel="noopener noreferrer">Source on GitHub</a>
+          <a href="https://x.com/shrinath_prabhu" rel="me">Follow @shrinath_prabhu on X</a>
+        </nav>
+      </footer>
+    </main>
+
+    <script src="/og-image/og.js"></script>
+  </body>
+</html>

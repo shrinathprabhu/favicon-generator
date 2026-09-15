@@ -1,5 +1,6 @@
 {
   "name": "favigen",
+  "main": "./src/worker.js",
   "compatibility_date": "2026-09-12",
   "workers_dev": true,
   "preview_urls": true,
@@ -8,7 +9,9 @@
   ],
   "assets": {
     "directory": "./public",
+    "binding": "ASSETS",
     "not_found_handling": "404-page",
-    "html_handling": "auto-trailing-slash"
+    "html_handling": "auto-trailing-slash",
+    "run_worker_first": ["/api/*"]
   }
 }

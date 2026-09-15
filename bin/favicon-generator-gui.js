@@ -8,6 +8,7 @@ import { ZipArchive } from 'archiver';
 import express from 'express';
 import multer from 'multer';
 import { SUPPORTED_EXTENSIONS, generateFaviconAssets } from '../src/generator.js';
+import { handleMetaApi } from '../src/meta-fetch.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const rootDir = path.resolve(__dirname, '..');
@@ -45,6 +46,14 @@ app.use(express.static(publicDir));
 
 app.get('/healthz', (request, response) => {
   response.type('text/plain').send('ok');
+});
+
+// The GUI runs on your machine, so it may fetch localhost and private network pages.
+app.get('/api/meta', async (request, response) => {
+  const apiResponse = await handleMetaApi(new Request(new URL(request.originalUrl, 'http://127.0.0.1')), { allowPrivate: true });
+  response.status(apiResponse.status);
+  apiResponse.headers.forEach((value, name) => response.setHeader(name, value));
+  response.send(await apiResponse.text());
 });
 
 app.post('/generate', upload.any(), async (request, response, next) => {

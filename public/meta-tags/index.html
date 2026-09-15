@@ -1,0 +1,266 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Meta Tags - Preview, edit, and generate SEO and Open Graph tags</title>
+    <meta name="description" content="Enter any URL, even localhost, to see how it looks on Google, X, Facebook, LinkedIn, and Slack. Edit the title, description, and image, check lengths, and copy ready-to-paste meta tags.">
+    <meta name="keywords" content="meta tags generator, Open Graph preview, Twitter card validator, og tags checker, SEO title length, meta description length, social preview">
+    <meta name="author" content="Shrinath Prabhu">
+    <meta name="robots" content="index, follow, max-image-preview:large">
+    <link rel="canonical" href="https://favigen.lowkey.tools/meta-tags/">
+    <link rel="icon" href="/favicon.ico" sizes="any">
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+    <link rel="manifest" href="/site.webmanifest">
+    <meta name="theme-color" content="#f7f7f4" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#171717" media="(prefers-color-scheme: dark)">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Favicon Generator">
+    <meta property="og:title" content="Meta Tags Preview and Generator">
+    <meta property="og:description" content="See how any link looks on Google, X, Facebook, LinkedIn, and Slack. Edit it live and copy the tags.">
+    <meta property="og:url" content="https://favigen.lowkey.tools/meta-tags/">
+    <meta property="og:image" content="https://favigen.lowkey.tools/og-image.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="Favicon Generator - tools for favicons, OG images, and meta tags.">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Meta Tags Preview and Generator">
+    <meta name="twitter:description" content="See how any link looks on Google, X, Facebook, LinkedIn, and Slack. Edit it live and copy the tags.">
+    <meta name="twitter:image" content="https://favigen.lowkey.tools/og-image.png">
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="stylesheet" href="/tools.css">
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "Meta Tags",
+        "url": "https://favigen.lowkey.tools/meta-tags/",
+        "applicationCategory": "DeveloperApplication",
+        "operatingSystem": "Any",
+        "isAccessibleForFree": true,
+        "description": "Preview how a URL looks on Google, X, Facebook, LinkedIn, and Slack, edit the meta tags, validate lengths, and copy HTML or Next.js metadata.",
+        "isPartOf": { "@type": "WebSite", "name": "lowkey.tools", "url": "https://lowkey.tools" },
+        "author": { "@type": "Person", "name": "Shrinath Prabhu", "url": "https://shrinath.me" },
+        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+      }
+    </script>
+  </head>
+  <body class="tool-page">
+    <main class="tool-shell">
+      <nav class="tool-nav" aria-label="Tools">
+        <a href="/">Favicon</a>
+        <a href="/og-image/">OG Image</a>
+        <a href="/meta-tags/" aria-current="page">Meta Tags</a>
+      </nav>
+
+      <header class="tool-header">
+        <img class="logo" src="/logo.svg" alt="" width="52" height="52">
+        <div>
+          <h1>Meta Tags</h1>
+          <p>See how your link looks on Google and social apps, tune it, and copy the tags.</p>
+        </div>
+      </header>
+
+      <form class="meta-fetch" id="fetch-form" novalidate>
+        <label for="page-url">Page URL</label>
+        <div class="meta-fetch-row">
+          <input id="page-url" name="page-url" type="text" inputmode="url" autocomplete="url" spellcheck="false" placeholder="https://example.com or localhost:3000">
+          <button type="submit" class="button" id="fetch-button">Fetch tags</button>
+        </div>
+        <div class="meta-fetch-links">
+          <button type="button" class="link-button" id="toggle-paste">Paste HTML instead</button>
+          <span class="hint">Works with localhost too.</span>
+        </div>
+        <p id="fetch-status" class="tool-status" role="status" aria-live="polite"></p>
+      </form>
+
+      <div class="notice" id="local-help" hidden>
+        <h3>Your browser could not read <span id="local-help-url"></span></h3>
+        <p class="hint">Local dev servers usually block cross-origin requests. Any of these will work:</p>
+        <ol>
+          <li>Drag <a class="bookmarklet" id="bookmarklet" href="#">Send to Meta Tags</a> to your bookmarks bar, open your local page, and click the bookmark. It also picks up tags your app adds with JavaScript.</li>
+          <li>Open the page source (<code>view-source:</code>), copy everything, and use <button type="button" class="link-button" data-open-paste>Paste HTML</button>.</li>
+          <li>Clone the repo and run <code>npm run gui</code>. The local version fetches localhost pages directly.</li>
+        </ol>
+      </div>
+
+      <div class="notice" id="paste-panel" hidden>
+        <div class="field">
+          <label for="paste-html">Page HTML</label>
+          <textarea id="paste-html" rows="6" spellcheck="false" placeholder="&lt;html&gt;&lt;head&gt;…&lt;/head&gt;"></textarea>
+        </div>
+        <div class="field">
+          <label for="paste-base">Page URL <span class="hint">Used to resolve relative image links</span></label>
+          <input id="paste-base" type="text" inputmode="url" spellcheck="false" placeholder="https://example.com/page">
+        </div>
+        <div><button type="button" class="button" id="paste-analyze">Read tags</button></div>
+      </div>
+
+      <div class="meta-workspace">
+        <form class="meta-editor" id="meta-form" autocomplete="off" novalidate>
+          <details class="panel-section" open>
+            <summary>Search</summary>
+            <div class="panel-body">
+              <div class="field" data-field="title">
+                <label for="f-title">Title <span class="counter" data-counter="title"></span></label>
+                <input id="f-title" name="title" type="text">
+                <div class="meter" data-meter="title"><span></span></div>
+              </div>
+              <div class="field" data-field="description">
+                <label for="f-description">Description <span class="counter" data-counter="description"></span></label>
+                <textarea id="f-description" name="description" rows="3"></textarea>
+                <div class="meter" data-meter="description"><span></span></div>
+              </div>
+              <div class="field">
+                <label for="f-canonical">Canonical URL</label>
+                <input id="f-canonical" name="canonical" type="url" spellcheck="false" placeholder="https://example.com/page">
+              </div>
+              <div class="row">
+                <div class="field">
+                  <label for="f-favicon">Favicon URL</label>
+                  <input id="f-favicon" name="favicon" type="url" spellcheck="false" placeholder="/favicon.ico">
+                </div>
+                <div class="field">
+                  <label for="f-themeColor">Theme color</label>
+                  <input id="f-themeColor" name="themeColor" type="text" spellcheck="false" placeholder="#ffffff">
+                </div>
+              </div>
+            </div>
+          </details>
+
+          <details class="panel-section" open>
+            <summary>Open Graph</summary>
+            <div class="panel-body">
+              <div class="field">
+                <label for="f-ogTitle">og:title <span class="counter" data-counter="ogTitle"></span></label>
+                <input id="f-ogTitle" name="ogTitle" type="text">
+                <div class="meter" data-meter="ogTitle"><span></span></div>
+              </div>
+              <div class="field">
+                <label for="f-ogDescription">og:description <span class="counter" data-counter="ogDescription"></span></label>
+                <textarea id="f-ogDescription" name="ogDescription" rows="3"></textarea>
+                <div class="meter" data-meter="ogDescription"><span></span></div>
+              </div>
+              <div class="field">
+                <label for="f-ogImage">og:image <a class="hint" href="/og-image/">Make one</a></label>
+                <input id="f-ogImage" name="ogImage" type="url" spellcheck="false" placeholder="https://example.com/og.png">
+              </div>
+              <div class="field">
+                <label for="f-ogImageAlt">og:image:alt <span class="counter" data-counter="ogImageAlt"></span></label>
+                <input id="f-ogImageAlt" name="ogImageAlt" type="text" placeholder="Describe the image">
+              </div>
+              <div class="row">
+                <div class="field">
+                  <label for="f-ogSiteName">og:site_name</label>
+                  <input id="f-ogSiteName" name="ogSiteName" type="text">
+                </div>
+                <div class="field">
+                  <label for="f-ogType">og:type</label>
+                  <select id="f-ogType" name="ogType">
+                    <option value="website">website</option>
+                    <option value="article">article</option>
+                    <option value="product">product</option>
+                    <option value="profile">profile</option>
+                    <option value="video.other">video.other</option>
+                  </select>
+                </div>
+              </div>
+              <div class="field">
+                <label for="f-ogUrl">og:url</label>
+                <input id="f-ogUrl" name="ogUrl" type="url" spellcheck="false">
+              </div>
+            </div>
+          </details>
+
+          <details class="panel-section">
+            <summary>X (Twitter)</summary>
+            <div class="panel-body">
+              <div class="field">
+                <span class="field-label">twitter:card</span>
+                <div class="segmented" role="radiogroup" aria-label="twitter:card">
+                  <label><input type="radio" name="twitterCard" value="summary_large_image"><span>Large image</span></label>
+                  <label><input type="radio" name="twitterCard" value="summary"><span>Summary</span></label>
+                </div>
+              </div>
+              <div class="row">
+                <div class="field">
+                  <label for="f-twitterSite">twitter:site</label>
+                  <input id="f-twitterSite" name="twitterSite" type="text" spellcheck="false" placeholder="@brand">
+                </div>
+                <div class="field">
+                  <label for="f-twitterCreator">twitter:creator</label>
+                  <input id="f-twitterCreator" name="twitterCreator" type="text" spellcheck="false" placeholder="@author">
+                </div>
+              </div>
+              <p class="hint">X falls back to Open Graph tags. Fill these only to show something different on X.</p>
+              <div class="field">
+                <label for="f-twitterTitle">twitter:title <span class="counter" data-counter="twitterTitle"></span></label>
+                <input id="f-twitterTitle" name="twitterTitle" type="text">
+                <div class="meter" data-meter="twitterTitle"><span></span></div>
+              </div>
+              <div class="field">
+                <label for="f-twitterDescription">twitter:description <span class="counter" data-counter="twitterDescription"></span></label>
+                <textarea id="f-twitterDescription" name="twitterDescription" rows="2"></textarea>
+                <div class="meter" data-meter="twitterDescription"><span></span></div>
+              </div>
+              <div class="field">
+                <label for="f-twitterImage">twitter:image</label>
+                <input id="f-twitterImage" name="twitterImage" type="url" spellcheck="false">
+              </div>
+            </div>
+          </details>
+        </form>
+
+        <div class="meta-results">
+          <section class="result-block" aria-labelledby="checks-heading">
+            <h2 id="checks-heading">Checks <span class="check-summary" id="check-summary"></span></h2>
+            <ul class="checks" id="checks"></ul>
+          </section>
+
+          <section class="result-block" aria-labelledby="preview-heading">
+            <h2 id="preview-heading">Previews</h2>
+            <div class="previews" id="previews"></div>
+          </section>
+
+          <section class="result-block" aria-labelledby="code-heading">
+            <h2 id="code-heading">Code</h2>
+            <div class="code-tabs">
+              <div class="segmented" role="radiogroup" aria-label="Code format">
+                <label><input type="radio" name="codeFormat" value="html" checked><span>HTML</span></label>
+                <label><input type="radio" name="codeFormat" value="next"><span>Next.js</span></label>
+              </div>
+              <button type="button" class="button small" id="copy-code">Copy code</button>
+            </div>
+            <label class="check"><input type="checkbox" id="explicit-x"> Repeat title, description, and image as twitter:* tags</label>
+            <pre class="code-block" id="code" tabindex="0"></pre>
+          </section>
+
+          <details class="raw-tags" id="raw-tags" hidden>
+            <summary>Tags found on the page (<span id="raw-count">0</span>)</summary>
+            <div class="raw-table-wrap">
+              <table class="raw-table">
+                <thead><tr><th scope="col">Tag</th><th scope="col">Value</th></tr></thead>
+                <tbody id="raw-body"></tbody>
+              </table>
+            </div>
+          </details>
+        </div>
+      </div>
+
+      <footer>
+        <p class="footer-discovery">Need a share image? Design one with the <a href="/og-image/">OG Image Generator</a>.</p>
+        <div class="footer-credits">
+          <p>A small tool in the <a href="https://lowkey.tools">lowkey.tools</a> collection.</p>
+          <p>Made by <a href="https://shrinath.me" rel="author">Shrinath Prabhu</a>, from the makers of <a href="https://owleye.dev">OwlEye Analytics</a>.</p>
+        </div>
+        <nav class="footer-links" aria-label="Project links">
+          <a href="https://github.com/shrinathprabhu/favicon-generator" rel="noopener noreferrer">Source on GitHub</a>
+          <a href="https://x.com/shrinath_prabhu" rel="me">Follow @shrinath_prabhu on X</a>
+        </nav>
+      </footer>
+    </main>
+
+    <script src="/meta-tags/meta.js"></script>
+  </body>
+</html>

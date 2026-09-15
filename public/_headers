@@ -5,7 +5,12 @@
   Referrer-Policy: strict-origin-when-cross-origin
   Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=()
   Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
-  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' https://api.fontsource.org https://cdn.jsdelivr.net; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';
+
+# Meta Tags previews images from any site and can read pages straight from localhost.
+/meta-tags/*
+  ! Content-Security-Policy
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self'; img-src 'self' data: blob: https: http:; font-src 'self'; connect-src 'self' https: http:; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';
 
 /
   Cache-Control: public, max-age=0, must-revalidate
@@ -14,6 +19,12 @@
   Cache-Control: public, max-age=0, must-revalidate
 
 /404.html
+  Cache-Control: public, max-age=0, must-revalidate
+
+/og-image/
+  Cache-Control: public, max-age=0, must-revalidate
+
+/meta-tags/
   Cache-Control: public, max-age=0, must-revalidate
 
 /*.js

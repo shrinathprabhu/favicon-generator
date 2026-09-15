@@ -48,6 +48,16 @@ CLI options:
 
 Supported formats: `.svg`, `.png`, `.webp`, `.jpg`, `.jpeg`, `.avif`, `.gif`, `.bmp`, `.ico`, `.tiff`.
 
+## Web Tools
+
+The site has three tools that share the same look and navigation:
+
+- **Favicon** (`/`): generates the favicon bundle described below.
+- **OG Image** (`/og-image/`): designs a 1200x630 (1.91:1) social share image without AI. Fill in a title and optional description, eyebrow, brand, footer, and website, then choose a layout (Spotlight, Centered, Split, Editorial), a theme, a background (solid, gradient, glow, aurora), a grid or dot pattern, and any [Fontsource](https://fontsource.org/) font with weight, size, letter spacing, and line height. Add a logo or use a monogram. Export PNG, JPG, or SVG. PNG defaults to a compact 256-color encoding (usually under 100 KB, versus around 600 KB from the browser's own encoder); switch to lossless when you need exact pixels. SVG can embed its fonts. The design is saved in the browser.
+- **Meta Tags** (`/meta-tags/`): enter a URL to read its title, description, canonical, Open Graph, and X tags. Edit them and see live previews for Google, X, Facebook, LinkedIn, and Slack, with character and Google pixel-width limits and checks for image size and missing tags. Copy the result as HTML or a Next.js `metadata` export.
+
+The hosted site cannot reach `localhost`. For local pages, the Meta Tags tool first tries fetching directly from your browser (this works if the dev server allows CORS). If that fails, it offers a "Send to Meta Tags" bookmarklet, a paste-HTML option, or the local GUI below, whose `/api/meta` route can fetch localhost pages.
+
 ## GUI
 
 Start the local GUI server:
@@ -62,7 +72,7 @@ Open this URL in Chrome:
 http://127.0.0.1:5173
 ```
 
-Pick an image, enter an app name, and the browser downloads a ZIP containing the generated `<appname>-favicon` folder.
+Pick an image, enter an app name, and the browser downloads a ZIP containing the generated `<appname>-favicon` folder. The OG Image and Meta Tags tools are at `/og-image/` and `/meta-tags/`.
 
 You can change the port:
 
@@ -86,7 +96,7 @@ Deploy this app with **Workers Static Assets**. In Cloudflare, create a Worker, 
 | Root directory | Leave empty (repository root) |
 | Build environment variable | `SKIP_DEPENDENCY_INSTALL=1` |
 
-The deployable site is already in `public`. The hosted GUI generates icons and ZIP files in the browser, so no Worker script, Node runtime, or server-side Sharp service is needed. The build variable skips installing the app's CLI dependencies; the deploy command downloads Wrangler when needed.
+The deployable site is already in `public`. The favicon and OG image tools run entirely in the browser, so no Node runtime or server-side Sharp service is needed. A small Worker script (`src/worker.js`) handles only `/api/meta`, which the Meta Tags tool uses to read the `<head>` of public pages; it has no dependencies, and Wrangler bundles it during deploy. Every other path is served straight from static assets (`run_worker_first: ["/api/*"]`). The build variable skips installing the app's CLI dependencies; the deploy command downloads Wrangler when needed.
 
 `wrangler.jsonc` configures `assets.directory` for Workers Static Assets. `public/_headers` supplies the security and cache headers, and `assets.not_found_handling: "404-page"` serves `public/404.html` for unknown paths. HTML routing normalizes `/index.html` to `/`.
 

@@ -25,6 +25,24 @@ Favicon Generator, also called Favigen, is a free developer utility for generati
 - Generated platform assets: `apple-touch-icon.png`, `android-chrome-192x192.png`, `android-chrome-512x512.png`, `mstile-150x150.png`.
 - Generated metadata: `site.webmanifest`, `browserconfig.xml`, `html-tags.txt`.
 
+## OG Image Generator
+
+URL: https://favigen.lowkey.tools/og-image/
+
+- Designs 1200x630 (1.91:1) Open Graph and social share images in the browser, without AI.
+- Inputs: title (required), description, eyebrow, brand name, footer, website, and an optional logo or monogram.
+- Controls: four layouts (Spotlight, Centered, Split, Editorial), color themes, background styles (solid, gradient, glow, aurora), grid or dot patterns, and any font from Fontsource with weight, size, letter spacing, and line height.
+- Exports: PNG, JPG (adjustable quality), or SVG (optionally with embedded fonts).
+
+## Meta Tags
+
+URL: https://favigen.lowkey.tools/meta-tags/
+
+- Fetches a URL (including localhost, through a bookmarklet, pasted HTML, or the local GUI) and reads its title, description, canonical, Open Graph, and X tags.
+- Previews the link on Google, X, Facebook, LinkedIn, and Slack, and updates live while editing.
+- Checks title and description length (characters and Google pixel width), image size and aspect ratio, and missing tags.
+- Generates HTML meta tags or a Next.js metadata export to paste into a site.
+
 ## CLI usage
 
 ```sh
