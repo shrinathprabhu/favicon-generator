@@ -1,4 +1,4 @@
-/* Wide layouts for the OG Image and Meta Tags tools. Builds on styles.css tokens. */
+/* Shared layouts for all three tools. Builds on styles.css tokens. */
 
 :root {
   --ok: #146c43;
@@ -45,6 +45,12 @@ body.tool-page {
   display: flex;
   align-items: center;
   gap: 16px;
+  min-height: 80px;
+}
+
+.tool-header > div {
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .tool-header .logo {
@@ -172,11 +178,12 @@ button.small {
 .field > label,
 .field-label {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
   gap: 8px;
   font-size: 13px;
   font-weight: 600;
+  flex-wrap: wrap;
 }
 
 .field-label output,
@@ -287,7 +294,10 @@ button.small {
 }
 
 .tool-status {
-  min-height: 20px;
+  height: 3em;
+  line-height: 1.5;
+  overflow: auto;
+  overflow-wrap: anywhere;
   font-size: 13px;
 }
 
@@ -297,6 +307,32 @@ button.small {
 
 .tool-shell footer {
   margin-top: 28px;
+}
+
+.favicon-workspace {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 380px;
+  align-items: start;
+  gap: 28px;
+  margin-top: 24px;
+}
+
+.favicon-workspace form {
+  margin-top: 0;
+}
+
+.favicon-workspace .content-section:first-child {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: 0;
+}
+
+.favicon-workspace > *,
+.tool-shell footer,
+.meta-fetch-row > *,
+.og-controls {
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 /* ---------- OG image generator ---------- */
@@ -334,8 +370,8 @@ button.small {
 }
 
 .og-meta {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
   justify-content: space-between;
   gap: 6px 16px;
   font-size: 13px;
@@ -357,6 +393,32 @@ button.small {
   font-weight: 500;
   color: var(--muted);
   font-variant-numeric: tabular-nums;
+  min-height: 1.5em;
+}
+
+.og-export-options {
+  display: grid;
+}
+
+.og-export-options > .field {
+  grid-area: 1 / 1;
+  align-content: start;
+}
+
+/* Keep the tallest format panel's space, even while another format is active. */
+.og-export-options > [hidden] {
+  display: grid !important;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.og-export .segmented label {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.og-export .segmented span {
+  white-space: normal;
 }
 
 .og-export-actions {
@@ -372,6 +434,7 @@ button.small {
 .og-controls {
   display: block;
   margin: 0;
+  container-type: inline-size;
 }
 
 .og-controls .panel-section:first-child {
@@ -410,6 +473,7 @@ button.small {
   border-radius: 4px;
   background: var(--soft);
   color: var(--muted);
+  aspect-ratio: 120 / 63;
 }
 
 .layout-option input:checked + span {
@@ -430,6 +494,7 @@ button.small {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
+  min-height: 36px;
 }
 
 .swatch {
@@ -448,9 +513,21 @@ button.small {
 }
 
 .chips {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 6px;
+  min-height: 66px;
+}
+
+@container (max-width: 343px) {
+  .swatches {
+    min-height: 80px;
+  }
+
+  .chips {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    min-height: 102px;
+  }
 }
 
 .chip {
@@ -491,6 +568,7 @@ button.small {
 
 .font-picker {
   position: relative;
+  min-height: 40px;
 }
 
 .font-picker-button {
@@ -587,6 +665,7 @@ button.small {
 .meta-fetch-row .button {
   min-height: 46px;
   padding-inline: 20px;
+  min-width: 150px;
 }
 
 .meta-fetch-links {
@@ -657,6 +736,7 @@ button.small {
   font-weight: 600;
   font-variant-numeric: tabular-nums;
   color: var(--muted);
+  min-height: 1.5em;
 }
 
 .counter[data-tone="ok"] { color: var(--ok); }
@@ -673,10 +753,12 @@ button.small {
 .meter span {
   display: block;
   height: 100%;
-  width: 0;
+  width: 100%;
+  transform: scaleX(0);
+  transform-origin: left;
   border-radius: inherit;
   background: var(--muted);
-  transition: width 0.15s ease;
+  transition: transform 0.15s ease;
 }
 
 .meter[data-tone="ok"] span { background: var(--ok); }
@@ -710,6 +792,10 @@ button.small {
   margin: 0;
   padding: 0;
   list-style: none;
+  height: 252px;
+  align-content: start;
+  overflow: auto;
+  scrollbar-gutter: stable;
 }
 
 .checks li {
@@ -744,9 +830,21 @@ button.small {
 
 .check-summary {
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
   font-size: 12px;
   font-weight: 600;
+}
+
+#checks-heading {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+}
+
+#check-summary {
+  min-height: 44px;
+  align-content: center;
+  justify-content: flex-end;
 }
 
 .check-summary span {
@@ -766,6 +864,11 @@ button.small {
   border: 1px solid var(--border);
   border-radius: 8px;
   overflow: hidden;
+  min-height: 480px;
+}
+
+#coverage-note {
+  min-height: 3em;
 }
 
 .coverage li {
@@ -1338,9 +1441,14 @@ button.small {
   flex-wrap: wrap;
 }
 
+#copy-code {
+  width: 164px;
+  max-width: 100%;
+}
+
 .code-block {
   margin: 0;
-  max-height: 460px;
+  height: 460px;
   padding: 16px;
   overflow: auto;
   border-radius: 8px;
@@ -1396,6 +1504,7 @@ button.small {
 }
 
 @media (max-width: 1020px) {
+  .favicon-workspace,
   .og-workspace,
   .meta-workspace {
     grid-template-columns: minmax(0, 1fr);
@@ -1421,5 +1530,10 @@ button.small {
 
   .meta-fetch-row {
     flex-direction: column;
+  }
+
+  .field > label:has(.counter) {
+    display: grid;
+    gap: 4px;
   }
 }

@@ -114,7 +114,7 @@ form.addEventListener('submit', async (event) => {
       });
     }
 
-    const zipBlob = createZip(zipFiles);
+    const zipBlob = await createZip(zipFiles);
     const zipName = `${appSlug}-favicon.zip`;
 
     triggerDownload(zipBlob, zipName);
@@ -358,15 +358,20 @@ const crcTable = (() => {
   return table;
 })();
 
-function crc32(uint8) {
+async function crc32(uint8) {
   let crc = 0xffffffff;
+  let start = performance.now();
   for (let i = 0; i < uint8.length; i++) {
     crc = (crc >>> 8) ^ crcTable[(crc ^ uint8[i]) & 0xff];
+    if ((i & 0xffff) === 0 && performance.now() - start > 8) {
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      start = performance.now();
+    }
   }
   return (crc ^ 0xffffffff) >>> 0;
 }
 
-function createZip(files) {
+async function createZip(files) {
   const textEncoder = new TextEncoder();
   const fileEntries = [];
   let offset = 0;
@@ -374,7 +379,7 @@ function createZip(files) {
   for (const file of files) {
     const nameBytes = textEncoder.encode(file.name);
     const dataBytes = file.data instanceof Uint8Array ? file.data : textEncoder.encode(file.data);
-    const fileCrc = crc32(dataBytes);
+    const fileCrc = await crc32(dataBytes);
 
     const localHeader = new Uint8Array(30);
     const lv = new DataView(localHeader.buffer);

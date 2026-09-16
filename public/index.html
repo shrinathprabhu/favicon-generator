@@ -39,6 +39,7 @@
     <meta name="twitter:image" content="https://favigen.lowkey.tools/og-image.png">
     <meta name="twitter:image:alt" content="Favicon Generator - a simple Sharp wrapper for generating favicon assets from one SVG.">
     <link rel="stylesheet" href="/styles.css">
+    <link rel="stylesheet" href="/tools.css">
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
@@ -122,41 +123,49 @@
       }
     </script>
   </head>
-  <body>
-    <main class="shell">
+  <body class="tool-page">
+    <main class="tool-shell">
       <nav class="tool-nav" aria-label="Tools">
         <a href="/" aria-current="page">Favicon</a>
         <a href="/og-image/">OG Image</a>
         <a href="/meta-tags/">Meta Tags</a>
       </nav>
 
-      <header>
-        <img class="logo" src="/logo.svg" alt="" width="64" height="64">
-        <h1>Favicon Generator</h1>
-        <p>A simple sharp wrapper that generates favicon for your apps with a single SVG</p>
+      <header class="tool-header">
+        <img class="logo" src="/logo.svg" alt="" width="52" height="52">
+        <div>
+          <h1>Favicon Generator</h1>
+          <p>A simple sharp wrapper that generates favicon for your apps with a single SVG</p>
+        </div>
       </header>
 
-      <form id="generator-form">
-        <label for="appName">App name</label>
-        <input id="appName" name="appName" type="text" autocomplete="organization" placeholder="My App" required>
+      <div class="favicon-workspace">
+        <div>
+          <form id="generator-form">
+            <label for="appName">App name</label>
+            <input id="appName" name="appName" type="text" autocomplete="organization" placeholder="My App" required>
 
-        <label for="imageFile">Image file (SVG, PNG, WebP, JPEG)</label>
-        <input id="imageFile" name="imageFile" type="file" accept=".svg,.png,.webp,.jpg,.jpeg,.avif,.gif,.ico,image/*" required>
+            <label for="imageFile">Image file (SVG, PNG, WebP, JPEG)</label>
+            <input id="imageFile" name="imageFile" type="file" accept=".svg,.png,.webp,.jpg,.jpeg,.avif,.gif,.ico,image/*" required>
 
-        <button type="submit">Generate ZIP</button>
-      </form>
+            <button type="submit">Generate ZIP</button>
+          </form>
 
-      <p id="status" role="status" aria-live="polite"></p>
+          <p id="status" role="status" aria-live="polite"></p>
+        </div>
 
-      <section class="content-section" aria-labelledby="output-heading">
-        <h2 id="output-heading">What It Generates</h2>
-        <p>Each download includes favicon.ico, favicon.svg, PNG sizes from 16x16 to 256x256, Apple touch icon, Android Chrome icons, Windows tile icon, site.webmanifest, browserconfig.xml, html-tags.txt, and the original source image.</p>
-      </section>
+        <aside aria-label="Generated assets and related tools">
+          <section class="content-section" aria-labelledby="output-heading">
+            <h2 id="output-heading">What It Generates</h2>
+            <p>Each download includes favicon.ico, favicon.svg, PNG sizes from 16x16 to 256x256, Apple touch icon, Android Chrome icons, Windows tile icon, site.webmanifest, browserconfig.xml, html-tags.txt, and the original source image.</p>
+          </section>
 
-      <section class="content-section" aria-labelledby="more-heading">
-        <h2 id="more-heading">Finish Your Social Previews</h2>
-        <p>Design a 1200x630 share card with the <a href="/og-image/">OG Image Generator</a>, then check how your links look on Google, X, Facebook, LinkedIn, and Slack with <a href="/meta-tags/">Meta Tags</a>.</p>
-      </section>
+          <section class="content-section" aria-labelledby="more-heading">
+            <h2 id="more-heading">Finish Your Social Previews</h2>
+            <p>Design a 1200x630 share card with the <a href="/og-image/">OG Image Generator</a>, then check how your links look on Google, X, Facebook, LinkedIn, and Slack with <a href="/meta-tags/">Meta Tags</a>.</p>
+          </section>
+        </aside>
+      </div>
 
       <footer>
         <p class="footer-discovery">Working on the rest of your project? Settle into a focus session with <a href="https://superfocus.lowkey.tools/">SuperFocus</a>.</p>

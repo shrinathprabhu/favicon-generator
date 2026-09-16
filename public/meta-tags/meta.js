@@ -49,6 +49,7 @@ const urlInput = $('#page-url');
 const fetchButton = $('#fetch-button');
 const fetchStatus = $('#fetch-status');
 const measureCtx = document.createElement('canvas').getContext('2d');
+let updateQueued = false;
 
 init();
 
@@ -86,8 +87,18 @@ function onEdit(event) {
   const { name, value, type, checked } = event.target;
   if (!FIELDS.includes(name)) return;
   if (type === 'radio' && !checked) return;
+  if (state[name] === value) return;
   state[name] = value;
-  update();
+  scheduleUpdate();
+}
+
+function scheduleUpdate() {
+  if (updateQueued) return;
+  updateQueued = true;
+  requestAnimationFrame(() => {
+    updateQueued = false;
+    update();
+  });
 }
 
 function syncEditor() {
@@ -197,7 +208,7 @@ function updateCounters() {
 
     if (meter) {
       meter.dataset.tone = tone;
-      meter.firstElementChild.style.width = `${Math.min(100, (length / limit.hard) * 100)}%`;
+      meter.firstElementChild.style.transform = `scaleX(${Math.min(1, length / limit.hard)})`;
     }
   }
 }
@@ -468,11 +479,11 @@ function probeImage(url) {
   img.referrerPolicy = 'no-referrer';
   img.onload = () => {
     Object.assign(probe, { status: 'ok', width: img.naturalWidth, height: img.naturalHeight });
-    if (isInUse(url)) update();
+    if (isInUse(url)) scheduleUpdate();
   };
   img.onerror = () => {
     probe.status = 'error';
-    if (isInUse(url)) update();
+    if (isInUse(url)) scheduleUpdate();
   };
   img.src = url;
   return probe;
@@ -526,11 +537,15 @@ function imageBox(url, extraClass = '') {
 
 function truncateToWidth(text, font, maxWidth) {
   if (measureText(text, font) <= maxWidth) return text;
-  let cut = text;
-  while (cut && measureText(`${cut} ...`, font) > maxWidth) {
-    cut = cut.slice(0, -1);
+  const characters = [...text];
+  let low = 0;
+  let high = characters.length;
+  while (low < high) {
+    const middle = Math.ceil((low + high) / 2);
+    if (measureText(`${characters.slice(0, middle).join('')} ...`, font) <= maxWidth) low = middle;
+    else high = middle - 1;
   }
-  return `${cut.trimEnd()} ...`;
+  return `${characters.slice(0, low).join('').trimEnd()} ...`;
 }
 
 function renderPreviews(eff) {

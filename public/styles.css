@@ -18,6 +18,10 @@
   box-sizing: border-box;
 }
 
+html {
+  scrollbar-gutter: stable;
+}
+
 body {
   margin: 0;
   min-height: 100vh;
@@ -103,7 +107,9 @@ button:disabled {
 }
 
 #status {
-  min-height: 24px;
+  height: 3em;
+  overflow: auto;
+  overflow-wrap: anywhere;
   margin-top: 16px;
   font-size: 14px;
 }
@@ -181,6 +187,27 @@ a {
   color: var(--text);
 }
 
+button,
+.button,
+input,
+select,
+textarea,
+.tool-nav a,
+.segmented span,
+.layout-option span {
+  transition: background-color 140ms ease, color 140ms ease, border-color 140ms ease, box-shadow 140ms ease, opacity 140ms ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}
+
 .tool-nav a[aria-current="page"] {
   color: var(--text);
   background: var(--surface);
@@ -188,6 +215,11 @@ a {
 }
 
 @media (max-width: 420px) {
+  .tool-nav a {
+    padding-inline: 8px;
+    font-size: 13px;
+  }
+
   .shell {
     padding: 22px;
   }

@@ -83,20 +83,22 @@
                 <label><input type="radio" name="format" value="svg"><span>SVG<small data-size="svg">&hellip;</small></span></label>
               </div>
             </div>
-            <div class="field" data-show-for-format="png">
-              <span class="field-label">PNG compression</span>
-              <div class="segmented" role="radiogroup" aria-label="PNG compression">
-                <label><input type="radio" name="pngMode" value="compact"><span>Compact &middot; 256 colors</span></label>
-                <label><input type="radio" name="pngMode" value="lossless"><span>Lossless</span></label>
+            <div class="og-export-options">
+              <div class="field" data-show-for-format="png">
+                <span class="field-label">PNG compression</span>
+                <div class="segmented" role="radiogroup" aria-label="PNG compression">
+                  <label><input type="radio" name="pngMode" value="compact"><span>Compact &middot; 256 colors</span></label>
+                  <label><input type="radio" name="pngMode" value="lossless"><span>Lossless</span></label>
+                </div>
               </div>
-            </div>
-            <div class="field" data-show-for-format="jpg">
-              <label for="quality">JPG quality <output data-for="quality"></output></label>
-              <input id="quality" name="quality" type="range" min="50" max="100" step="1" form="og-form">
-            </div>
-            <div data-show-for-format="svg" class="field">
-              <label class="check"><input type="checkbox" name="embedFonts" form="og-form"> Embed fonts in the SVG</label>
-              <span class="hint">Most social networks only accept PNG or JPG for og:image. Use SVG for editing or archiving.</span>
+              <div class="field" data-show-for-format="jpg" hidden>
+                <label for="quality">JPG quality <output data-for="quality"></output></label>
+                <input id="quality" name="quality" type="range" min="50" max="100" step="1" form="og-form">
+              </div>
+              <div data-show-for-format="svg" class="field" hidden>
+                <label class="check"><input type="checkbox" name="embedFonts" form="og-form"> Embed fonts in the SVG</label>
+                <span class="hint">Most social networks only accept PNG or JPG for og:image. Use SVG for editing or archiving.</span>
+              </div>
             </div>
             <div class="og-export-actions">
               <button type="button" class="button" id="og-download">Download</button>
@@ -255,12 +257,16 @@
                 <input id="angle" name="angle" type="range" min="0" max="360" step="5">
               </div>
               <div class="field">
-                <span class="field-label">Pattern</span>
-                <div class="segmented" role="radiogroup" aria-label="Pattern">
-                  <label><input type="radio" name="pattern" value="none"><span>None</span></label>
-                  <label><input type="radio" name="pattern" value="grid"><span>Grid</span></label>
-                  <label><input type="radio" name="pattern" value="dots"><span>Dots</span></label>
-                </div>
+                <label for="pattern">Pattern</label>
+                <select id="pattern" name="pattern">
+                  <option value="none">None</option>
+                  <option value="grid">Grid</option>
+                  <option value="dots">Dots</option>
+                  <option value="diagonal">Diagonal lines</option>
+                  <option value="crosses">Crosses</option>
+                  <option value="diamonds">Diamonds</option>
+                  <option value="waves">Waves</option>
+                </select>
               </div>
               <div class="row">
                 <div class="field" data-hide-for-pattern="none">

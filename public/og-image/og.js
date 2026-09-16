@@ -95,6 +95,14 @@ const DEFAULTS = {
 const NUMBER_KEYS = new Set(['logoSize', 'logoRadius', 'headingWeight', 'headingSize', 'tracking', 'lineHeight', 'bodyWeight', 'bodySize', 'angle', 'patternOpacity', 'padding', 'quality']);
 const COLOR_KEYS = ['bg', 'bg2', 'text', 'muted', 'accent'];
 const WEIGHT_NAMES = { 100: 'Thin', 200: 'Extra Light', 300: 'Light', 400: 'Regular', 500: 'Medium', 600: 'Semibold', 700: 'Bold', 800: 'Extra Bold', 900: 'Black' };
+const PATTERNS = {
+  grid: { size: 48, path: 'M0.5 0V48 M0 0.5H48' },
+  dots: { size: 32, circle: [16, 16, 1.6] },
+  diagonal: { size: 32, path: 'M-8 8L8 -8 M0 32L32 0 M24 40L40 24' },
+  crosses: { size: 32, path: 'M12 16H20 M16 12V20' },
+  diamonds: { size: 48, path: 'M24 0L48 24L24 48L0 24Z' },
+  waves: { size: 48, path: 'M-12 24Q0 8 12 24T36 24T60 24' }
+};
 
 const workspace = document.querySelector('.og-workspace');
 const canvas = document.querySelector('#og-canvas');
@@ -104,6 +112,8 @@ const supportsLetterSpacing = 'letterSpacing' in CanvasRenderingContext2D.protot
 
 const fontsById = new Map(CURATED_FONTS.map((font) => [font.id, font]));
 const fontFiles = new Map();
+const measurements = new Map();
+let measurementFont = '';
 let fontListPromise;
 let fontListLoaded = false;
 let logoImage = null;
@@ -112,6 +122,15 @@ let lastOps = [];
 let renderQueued = false;
 let renderToken = 0;
 let sizeTimer;
+let saveTimer;
+let pendingRender = Promise.resolve();
+let renderedState;
+let exportCache = new Map();
+let estimateRunning = false;
+let estimateRevision = 0;
+let pngWorker;
+let pngJobId = 0;
+const pngJobs = new Map();
 
 const state = loadState();
 
@@ -147,6 +166,7 @@ function loadState() {
           merged[key] = saved[key];
         }
       }
+      if (merged.pattern !== 'none' && !Object.hasOwn(PATTERNS, merged.pattern)) merged.pattern = 'none';
       return merged;
     }
   } catch {
@@ -162,6 +182,11 @@ function saveState() {
     // A large logo can exceed the quota; the design still works for this session.
   }
 }
+
+window.addEventListener('pagehide', () => {
+  clearTimeout(saveTimer);
+  saveState();
+});
 
 function setStatus(message, tone = '') {
   statusEl.textContent = message;
@@ -244,7 +269,8 @@ function onFieldChange(event) {
 function commit({ sync = true } = {}) {
   if (sync) syncForm();
   else updateConditionalUi();
-  saveState();
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(saveState, 500);
   requestRender();
 }
 
@@ -257,7 +283,7 @@ function syncForm() {
       input.checked = input.value === String(state[key]);
     } else if (input.type === 'checkbox') {
       input.checked = Boolean(state[key]);
-    } else if (input.tagName === 'SELECT') {
+    } else if (input.tagName === 'SELECT' && input.name !== 'pattern') {
       return;
     } else if (input.value !== String(state[key])) {
       input.value = state[key];
@@ -703,11 +729,21 @@ function loadLogoImage(src) {
 /* ---------- render pipeline ---------- */
 
 function requestRender() {
+  estimateRevision += 1;
+  clearTimeout(sizeTimer);
   if (renderQueued) return;
   renderQueued = true;
-  requestAnimationFrame(() => {
-    renderQueued = false;
-    render();
+  pendingRender = new Promise((resolve) => {
+    requestAnimationFrame(async () => {
+      renderQueued = false;
+      try {
+        await render();
+      } catch (error) {
+        setStatus(error.message || 'Could not render the preview.', 'error');
+      } finally {
+        resolve();
+      }
+    });
   });
 }
 
@@ -733,17 +769,27 @@ async function render() {
   const failed = fontResults.find((result) => result.status === 'rejected');
   setStatus(failed ? `${failed.reason.message} Using a system font.` : '', failed ? 'error' : '');
 
+  measurements.clear();
   lastOps = buildLayout(s, { specs, logo });
   paintCanvas(canvas, s, lastOps);
+  renderedState = s;
+  exportCache = new Map();
   scheduleSizeEstimate();
 }
 
 /* ---------- text measurement ---------- */
 
 function measure(text, spec, size, tracking) {
-  measureCtx.font = `${spec.style === 'italic' ? 'italic ' : ''}${spec.weight} ${size}px ${spec.canvasFamily}`;
-  if (supportsLetterSpacing) measureCtx.letterSpacing = '0px';
-  return measureCtx.measureText(text).width + tracking * size * [...text].length;
+  const key = `${spec.key}:${size}:${tracking}:${text}`;
+  if (measurements.has(key)) return measurements.get(key);
+  const font = `${spec.style === 'italic' ? 'italic ' : ''}${spec.weight} ${size}px ${spec.canvasFamily}`;
+  if (font !== measurementFont) {
+    measureCtx.font = font;
+    measurementFont = font;
+  }
+  const width = measureCtx.measureText(text).width + tracking * size * [...text].length;
+  measurements.set(key, width);
+  return width;
 }
 
 function wrap(text, width, measureLine) {
@@ -817,11 +863,13 @@ function textBlock({ text, spec, size, minSize = size, lineHeight, tracking = 0,
   const measureLine = () => (line) => measure(line, spec, fontSize, tracking);
 
   while (true) {
-    lines = (balance ? balancedWrap : wrap)(content, width, measureLine());
+    lines = wrap(content, width, measureLine());
     const fits = lines.length <= maxLines && lines.length * fontSize * lineHeight <= maxHeight;
     if (fits || !autoFit || fontSize <= minSize) break;
     fontSize = Math.max(minSize, fontSize - 2);
   }
+
+  if (balance) lines = balancedWrap(content, width, measureLine());
 
   const heightLines = Math.max(1, Math.min(maxLines, Math.floor(maxHeight / (fontSize * lineHeight)) || 1));
   lines = clampLines(lines, heightLines, width, measureLine());
@@ -1192,6 +1240,24 @@ function patternFade(s) {
     : { cx: W * 0.92, cy: H * 0.1, r: 980 };
 }
 
+function patternTile(s) {
+  const spec = PATTERNS[s.pattern];
+  const tile = document.createElement('canvas');
+  tile.width = tile.height = spec.size;
+  const ctx = tile.getContext('2d');
+  if (spec.circle) {
+    ctx.fillStyle = s.text;
+    ctx.beginPath();
+    ctx.arc(...spec.circle, 0, Math.PI * 2);
+    ctx.fill();
+  } else {
+    ctx.strokeStyle = s.text;
+    ctx.lineWidth = 1;
+    ctx.stroke(new Path2D(spec.path));
+  }
+  return tile;
+}
+
 const GLOW_STOPS = [[0, 1], [0.45, 0.45], [1, 0]];
 
 /* ---------- canvas renderer ---------- */
@@ -1226,19 +1292,8 @@ function paintCanvas(target, s, ops) {
     layer.width = W;
     layer.height = H;
     const lctx = layer.getContext('2d');
-    lctx.fillStyle = s.text;
-    if (s.pattern === 'grid') {
-      for (let x = 0; x < W; x += 48) lctx.fillRect(x, 0, 1, H);
-      for (let y = 0; y < H; y += 48) lctx.fillRect(0, y, W, 1);
-    } else {
-      for (let x = 16; x < W; x += 32) {
-        for (let y = 16; y < H; y += 32) {
-          lctx.beginPath();
-          lctx.arc(x, y, 1.6, 0, Math.PI * 2);
-          lctx.fill();
-        }
-      }
-    }
+    lctx.fillStyle = lctx.createPattern(patternTile(s), 'repeat');
+    lctx.fillRect(0, 0, W, H);
     const fade = patternFade(s);
     const mask = lctx.createRadialGradient(fade.cx, fade.cy, 0, fade.cx, fade.cy, fade.r);
     mask.addColorStop(0, 'rgba(0,0,0,1)');
@@ -1374,9 +1429,11 @@ function buildSvg(s, ops, { embedFonts }) {
 
   if (s.pattern !== 'none') {
     const fade = patternFade(s);
-    defs.push(s.pattern === 'grid'
-      ? `<pattern id="pat" width="48" height="48" patternUnits="userSpaceOnUse"><rect width="1" height="48" fill="${s.text}"/><rect width="48" height="1" fill="${s.text}"/></pattern>`
-      : `<pattern id="pat" width="32" height="32" patternUnits="userSpaceOnUse"><circle cx="16" cy="16" r="1.6" fill="${s.text}"/></pattern>`);
+    const spec = PATTERNS[s.pattern];
+    const shape = spec.circle
+      ? `<circle cx="${spec.circle[0]}" cy="${spec.circle[1]}" r="${spec.circle[2]}" fill="${s.text}"/>`
+      : `<path d="${spec.path}" fill="none" stroke="${s.text}" stroke-width="1"/>`;
+    defs.push(`<pattern id="pat" width="${spec.size}" height="${spec.size}" patternUnits="userSpaceOnUse">${shape}</pattern>`);
     defs.push(`<radialGradient id="fade" gradientUnits="userSpaceOnUse" cx="${n(fade.cx)}" cy="${n(fade.cy)}" r="${fade.r}"><stop offset="0" stop-color="#fff"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>`);
     defs.push(`<mask id="patmask" maskUnits="userSpaceOnUse" x="0" y="0" width="${W}" height="${H}"><rect width="${W}" height="${H}" fill="url(#fade)"/></mask>`);
     body.push(`<rect width="${W}" height="${H}" fill="url(#pat)" opacity="${s.patternOpacity / 100}" mask="url(#patmask)"/>`);
@@ -1434,285 +1491,111 @@ function bytesToBase64(bytes) {
   return btoa(binary);
 }
 
-/* ---------- PNG encoding ---------- */
-// Browsers encode canvas PNGs quickly but loosely (a glow background comes out
-// around 600 KB). Re-encoding with per-row filters, or reducing to a dithered
-// 256-color palette, gives the same image at a fraction of the size.
-
-const CRC_TABLE = (() => {
-  const table = new Uint32Array(256);
-  for (let n = 0; n < 256; n += 1) {
-    let c = n;
-    for (let k = 0; k < 8; k += 1) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1;
-    table[n] = c >>> 0;
-  }
-  return table;
-})();
-
-async function encodePng(imageData, compact) {
-  if (typeof CompressionStream === 'undefined') return null;
-
-  const { width, height, data } = imageData;
-  let header;
-  let raw;
-  let palette = null;
-
-  const indexed = compact ? quantize(data, width, height) : null;
-  if (indexed) {
-    header = [8, 3];
-    palette = indexed.palette;
-    raw = new Uint8Array((width + 1) * height);
-    for (let y = 0; y < height; y += 1) {
-      raw.set(indexed.pixels.subarray(y * width, (y + 1) * width), y * (width + 1) + 1);
-    }
-  } else {
-    header = [8, 2];
-    const rgb = new Uint8Array(width * height * 3);
-    for (let i = 0, j = 0; i < data.length; i += 4) {
-      rgb[j++] = data[i];
-      rgb[j++] = data[i + 1];
-      rgb[j++] = data[i + 2];
-    }
-    raw = filterRows(rgb, width, height, 3);
-  }
-
-  const compressed = new Uint8Array(await new Response(new Blob([raw]).stream().pipeThrough(new CompressionStream('deflate'))).arrayBuffer());
-
-  const ihdr = new Uint8Array(13);
-  const view = new DataView(ihdr.buffer);
-  view.setUint32(0, width);
-  view.setUint32(4, height);
-  ihdr.set([header[0], header[1], 0, 0, 0], 8);
-
-  const chunks = [pngChunk('IHDR', ihdr)];
-  if (palette) chunks.push(pngChunk('PLTE', palette));
-  chunks.push(pngChunk('IDAT', compressed), pngChunk('IEND', new Uint8Array(0)));
-
-  return new Blob([new Uint8Array([137, 80, 78, 71, 13, 10, 26, 10]), ...chunks], { type: 'image/png' });
-}
-
-function pngChunk(type, body) {
-  const chunk = new Uint8Array(body.length + 12);
-  const view = new DataView(chunk.buffer);
-  view.setUint32(0, body.length);
-  for (let i = 0; i < 4; i += 1) chunk[4 + i] = type.charCodeAt(i);
-  chunk.set(body, 8);
-  let crc = 0xffffffff;
-  for (let i = 4; i < body.length + 8; i += 1) crc = CRC_TABLE[(crc ^ chunk[i]) & 0xff] ^ (crc >>> 8);
-  view.setUint32(body.length + 8, (crc ^ 0xffffffff) >>> 0);
-  return chunk;
-}
-
-// Picks the PNG filter per row that minimizes the sum of absolute differences.
-function filterRows(pixels, width, height, bpp) {
-  const rowLength = width * bpp;
-  const out = new Uint8Array((rowLength + 1) * height);
-  const candidates = Array.from({ length: 5 }, () => new Uint8Array(rowLength));
-  let previous = new Uint8Array(rowLength);
-
-  for (let y = 0; y < height; y += 1) {
-    const row = pixels.subarray(y * rowLength, (y + 1) * rowLength);
-    const scores = [0, 0, 0, 0, 0];
-
-    for (let i = 0; i < rowLength; i += 1) {
-      const left = i >= bpp ? row[i - bpp] : 0;
-      const up = previous[i];
-      const upLeft = i >= bpp ? previous[i - bpp] : 0;
-      const p = left + up - upLeft;
-      const pa = Math.abs(p - left);
-      const pb = Math.abs(p - up);
-      const pc = Math.abs(p - upLeft);
-      const paeth = pa <= pb && pa <= pc ? left : pb <= pc ? up : upLeft;
-      const values = [row[i], row[i] - left, row[i] - up, row[i] - ((left + up) >> 1), row[i] - paeth];
-
-      for (let f = 0; f < 5; f += 1) {
-        const v = values[f] & 255;
-        candidates[f][i] = v;
-        scores[f] += v < 128 ? v : 256 - v;
-      }
-    }
-
-    const best = scores.indexOf(Math.min(...scores));
-    out[y * (rowLength + 1)] = best;
-    out.set(candidates[best], y * (rowLength + 1) + 1);
-    previous = row;
-  }
-
-  return out;
-}
-
-// Median-cut quantization to 256 colors with 4x4 ordered dithering, which hides
-// gradient banding while still compressing well (unlike error diffusion).
-function quantize(data, width, height) {
-  const BITS = 6;
-  const SHIFT = 8 - BITS;
-  const MASK = (1 << BITS) - 1;
-  const bucketOf = (r, g, b) => ((r >> SHIFT) << (2 * BITS)) | ((g >> SHIFT) << BITS) | (b >> SHIFT);
-
-  const exact = new Map();
-  for (let i = 0; i < data.length && exact.size <= 256; i += 4) {
-    const color = (data[i] << 16) | (data[i + 1] << 8) | data[i + 2];
-    if (!exact.has(color)) exact.set(color, exact.size);
-  }
-
-  const pixels = new Uint8Array(width * height);
-
-  if (exact.size <= 256) {
-    const palette = new Uint8Array(exact.size * 3);
-    for (const [color, index] of exact) palette.set([color >> 16, (color >> 8) & 255, color & 255], index * 3);
-    for (let p = 0, i = 0; p < pixels.length; p += 1, i += 4) {
-      pixels[p] = exact.get((data[i] << 16) | (data[i + 1] << 8) | data[i + 2]);
-    }
-    return { palette, pixels };
-  }
-
-  const buckets = 1 << (3 * BITS);
-  const counts = new Uint32Array(buckets);
-  const sums = new Float64Array(buckets * 3);
-  const squares = new Float64Array(buckets);
-  for (let i = 0; i < data.length; i += 4) {
-    const k = bucketOf(data[i], data[i + 1], data[i + 2]);
-    counts[k] += 1;
-    sums[k * 3] += data[i];
-    sums[k * 3 + 1] += data[i + 1];
-    sums[k * 3 + 2] += data[i + 2];
-    squares[k] += data[i] * data[i] + data[i + 1] * data[i + 1] + data[i + 2] * data[i + 2];
-  }
-
-  const used = [];
-  for (let k = 0; k < buckets; k += 1) if (counts[k]) used.push(k);
-
-  // A box's error is its sum of squared distances to its mean color. Always
-  // split the box with the most error, along its highest-variance channel, at
-  // the point that minimizes the error of the two halves. Spending colors where
-  // error is highest keeps anti-aliased text edges accurate.
-  const makeBox = (keys) => {
-    let n = 0;
-    let r = 0;
-    let g = 0;
-    let b = 0;
-    let sq = 0;
-    const channelSquares = [0, 0, 0];
-    for (const k of keys) {
-      n += counts[k];
-      r += sums[k * 3];
-      g += sums[k * 3 + 1];
-      b += sums[k * 3 + 2];
-      sq += squares[k];
-      for (let c = 0; c < 3; c += 1) channelSquares[c] += (sums[k * 3 + c] * sums[k * 3 + c]) / counts[k];
-    }
-    const variances = [channelSquares[0] - (r * r) / n, channelSquares[1] - (g * g) / n, channelSquares[2] - (b * b) / n];
-    const channel = [2 * BITS, BITS, 0][variances.indexOf(Math.max(...variances))];
-    return { keys, n, r, g, b, sq, channel, error: keys.length > 1 ? sq - (r * r + g * g + b * b) / n : 0 };
-  };
-
-  const boxes = [makeBox(used)];
-  while (boxes.length < 256) {
-    let target = -1;
-    for (let i = 0; i < boxes.length; i += 1) {
-      if (boxes[i].error > 0 && (target < 0 || boxes[i].error > boxes[target].error)) target = i;
-    }
-    if (target < 0) break;
-
-    const [box] = boxes.splice(target, 1);
-    const shift = box.channel;
-    box.keys.sort((a, b) => ((a >> shift) & MASK) - ((b >> shift) & MASK));
-
-    let n = 0;
-    let r = 0;
-    let g = 0;
-    let b = 0;
-    let sq = 0;
-    let split = 0;
-    let bestError = Infinity;
-    for (let i = 0; i < box.keys.length - 1; i += 1) {
-      const k = box.keys[i];
-      n += counts[k];
-      r += sums[k * 3];
-      g += sums[k * 3 + 1];
-      b += sums[k * 3 + 2];
-      sq += squares[k];
-      const n2 = box.n - n;
-      const r2 = box.r - r;
-      const g2 = box.g - g;
-      const b2 = box.b - b;
-      const error = sq - (r * r + g * g + b * b) / n + (box.sq - sq) - (r2 * r2 + g2 * g2 + b2 * b2) / n2;
-      if (error < bestError) {
-        bestError = error;
-        split = i;
-      }
-    }
-    boxes.push(makeBox(box.keys.slice(0, split + 1)), makeBox(box.keys.slice(split + 1)));
-  }
-
-  const palette = new Uint8Array(boxes.length * 3);
-  boxes.forEach((box, index) => {
-    palette.set([Math.round(box.r / box.n), Math.round(box.g / box.n), Math.round(box.b / box.n)], index * 3);
-  });
-
-  const lookup = new Int16Array(buckets).fill(-1);
-  const nearest = (r, g, b) => {
-    const k = bucketOf(r, g, b);
-    let best = lookup[k];
-    if (best >= 0) return best;
-    let bestDistance = Infinity;
-    for (let j = 0; j < palette.length; j += 3) {
-      const distance = (palette[j] - r) ** 2 + (palette[j + 1] - g) ** 2 + (palette[j + 2] - b) ** 2;
-      if (distance < bestDistance) {
-        bestDistance = distance;
-        best = j / 3;
-      }
-    }
-    lookup[k] = best;
-    return best;
-  };
-
-  const bayer = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5];
-  const clamp = (v) => (v < 0 ? 0 : v > 255 ? 255 : v);
-  for (let y = 0; y < height; y += 1) {
-    for (let x = 0; x < width; x += 1) {
-      const i = (y * width + x) * 4;
-      const offset = (bayer[((y & 3) << 2) | (x & 3)] / 16 - 0.5) * 6;
-      pixels[y * width + x] = nearest(clamp(data[i] + offset), clamp(data[i + 1] + offset), clamp(data[i + 2] + offset));
-    }
-  }
-
-  return { palette, pixels };
-}
-
 /* ---------- export ---------- */
 
 async function exportBlob(format) {
-  if (format === 'svg') {
-    return new Blob([buildSvg(state, lastOps, { embedFonts: state.embedFonts })], { type: 'image/svg+xml' });
-  }
+  // Wait for the latest font/logo render, including edits made while it loaded.
+  let pending;
+  do {
+    pending = pendingRender;
+    await pending;
+  } while (pending !== pendingRender);
+  if (!renderedState) throw new Error('The preview is not ready yet.');
+  if (exportCache.has(format)) return exportCache.get(format);
 
+  const s = renderedState;
+  const cache = exportCache;
+  let promise;
+  if (format === 'svg') {
+    promise = Promise.resolve(new Blob([buildSvg(s, lastOps, { embedFonts: s.embedFonts })], { type: 'image/svg+xml' }));
+  } else {
+    // Snapshot before awaiting compression so a later edit cannot change this export.
+    const snapshot = document.createElement('canvas');
+    snapshot.width = W;
+    snapshot.height = H;
+    snapshot.getContext('2d').drawImage(canvas, 0, 0);
+    promise = encodeSnapshot(snapshot, format, s);
+  }
+  cache.set(format, promise);
+  promise.catch(() => cache.delete(format));
+  return promise;
+}
+
+async function encodeSnapshot(snapshot, format, s) {
   if (format === 'png') {
-    const imageData = canvas.getContext('2d').getImageData(0, 0, W, H);
-    const blob = await encodePng(imageData, state.pngMode === 'compact').catch(() => null);
+    const imageData = snapshot.getContext('2d').getImageData(0, 0, W, H);
+    const blob = await compressPng(imageData, s.pngMode === 'compact').catch(() => null);
     if (blob) return blob;
   }
-
+  // Native asynchronous encoding is also the fallback when Workers are unavailable.
   return new Promise((resolve, reject) => {
-    canvas.toBlob(
+    snapshot.toBlob(
       (blob) => (blob ? resolve(blob) : reject(new Error('Could not export the image.'))),
       format === 'jpg' ? 'image/jpeg' : 'image/png',
-      format === 'jpg' ? state.quality / 100 : undefined
+      format === 'jpg' ? s.quality / 100 : undefined
     );
+  });
+}
+
+function stopPngWorker() {
+  pngWorker?.terminate();
+  pngWorker = null;
+  for (const job of pngJobs.values()) {
+    clearTimeout(job.timer);
+    job.reject(new Error('PNG worker unavailable.'));
+  }
+  pngJobs.clear();
+}
+
+function compressPng(imageData, compact) {
+  return new Promise((resolve, reject) => {
+    if (!pngWorker) {
+      pngWorker = new Worker('/og-image/png-worker.js', { type: 'module' });
+      pngWorker.onmessage = ({ data }) => {
+        const job = pngJobs.get(data.id);
+        if (!job) return;
+        clearTimeout(job.timer);
+        pngJobs.delete(data.id);
+        if (data.error) job.reject(new Error(data.error));
+        else job.resolve(data.blob);
+      };
+      pngWorker.onerror = (event) => {
+        event.preventDefault();
+        stopPngWorker();
+      };
+      pngWorker.onmessageerror = stopPngWorker;
+    }
+    const id = ++pngJobId;
+    const timer = setTimeout(stopPngWorker, 30000);
+    pngJobs.set(id, { resolve, reject, timer });
+    try {
+      pngWorker.postMessage({ id, imageData, compact }, [imageData.data.buffer]);
+    } catch {
+      stopPngWorker();
+    }
   });
 }
 
 function scheduleSizeEstimate() {
   clearTimeout(sizeTimer);
   sizeTimer = setTimeout(async () => {
-    for (const format of ['png', 'jpg', 'svg']) {
-      const label = document.querySelector(`[data-size="${format}"]`);
-      try {
-        const blob = await exportBlob(format);
-        label.textContent = formatBytes(blob.size);
-      } catch {
-        label.textContent = '—';
+    if (estimateRunning) return;
+    estimateRunning = true;
+    const revision = estimateRevision;
+    try {
+      for (const format of ['png', 'jpg', 'svg']) {
+        if (revision !== estimateRevision) break;
+        const label = document.querySelector(`[data-size="${format}"]`);
+        try {
+          const blob = await exportBlob(format);
+          if (revision === estimateRevision) label.textContent = formatBytes(blob.size);
+        } catch {
+          if (revision === estimateRevision) label.textContent = '—';
+        }
       }
+    } finally {
+      estimateRunning = false;
+      if (revision !== estimateRevision) scheduleSizeEstimate();
     }
   }, 350);
 }
@@ -1724,28 +1607,38 @@ function formatBytes(bytes) {
 }
 
 function bindExport() {
-  document.querySelector('#og-download').addEventListener('click', async () => {
+  document.querySelector('#og-download').addEventListener('click', async (event) => {
+    const button = event.currentTarget;
+    const format = state.format;
+    const filename = `${slugify(state.title) || 'og-image'}.${format}`;
+    button.disabled = true;
     try {
-      const blob = await exportBlob(state.format);
-      triggerDownload(blob, `${slugify(state.title) || 'og-image'}.${state.format}`);
-      setStatus(`Downloaded ${state.format.toUpperCase()} · ${formatBytes(blob.size)}`);
+      const blob = await exportBlob(format);
+      triggerDownload(blob, filename);
+      setStatus(`Downloaded ${format.toUpperCase()} · ${formatBytes(blob.size)}`);
     } catch (error) {
       setStatus(error.message, 'error');
+    } finally {
+      button.disabled = false;
     }
   });
 
   const copyButton = document.querySelector('#og-copy');
   if (!navigator.clipboard?.write || typeof ClipboardItem === 'undefined') {
-    copyButton.hidden = true;
+    copyButton.disabled = true;
+    copyButton.title = 'Image clipboard access is not supported in this browser.';
     return;
   }
 
   copyButton.addEventListener('click', async () => {
+    copyButton.disabled = true;
     try {
       await navigator.clipboard.write([new ClipboardItem({ 'image/png': exportBlob('png') })]);
       setStatus('PNG copied to clipboard.');
     } catch {
       setStatus('Your browser blocked clipboard access.', 'error');
+    } finally {
+      copyButton.disabled = false;
     }
   });
 }

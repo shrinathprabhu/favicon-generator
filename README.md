@@ -53,7 +53,7 @@ Supported formats: `.svg`, `.png`, `.webp`, `.jpg`, `.jpeg`, `.avif`, `.gif`, `.
 The site has three tools that share the same look and navigation:
 
 - **Favicon** (`/`): generates the favicon bundle described below.
-- **OG Image** (`/og-image/`): designs a 1200x630 (1.91:1) social share image without AI. Fill in a title and optional description, eyebrow, brand, footer, and website, then choose a layout (Spotlight, Centered, Split, Editorial), a theme, a background (solid, gradient, glow, aurora), a grid or dot pattern, and any [Fontsource](https://fontsource.org/) font with weight, size, letter spacing, and line height. Add a logo or use a monogram. Export PNG, JPG, or SVG. PNG defaults to a compact 256-color encoding (usually under 100 KB, versus around 600 KB from the browser's own encoder); switch to lossless when you need exact pixels. SVG can embed its fonts. The design is saved in the browser.
+- **OG Image** (`/og-image/`): designs a 1200x630 (1.91:1) social share image without AI. Fill in a title and optional description, eyebrow, brand, footer, and website, then choose a layout (Spotlight, Centered, Split, Editorial), a theme, a background (solid, gradient, glow, aurora), a pattern (grid, dots, diagonal lines, crosses, diamonds, or waves), and any [Fontsource](https://fontsource.org/) font with weight, size, letter spacing, and line height. Add a logo or use a monogram. Export PNG, JPG, or SVG. PNG defaults to a compact 256-color encoding (usually under 100 KB, versus around 600 KB from the browser's own encoder); switch to lossless when you need exact pixels. Compression runs in a background Web Worker, with native asynchronous PNG encoding as a fallback. SVG can embed its fonts. The design is saved in the browser.
 - **Meta Tags** (`/meta-tags/`): enter a URL to read its title, description, canonical, Open Graph, and X tags. Edit them and see live previews for Google, X, Facebook, LinkedIn, and Slack, with character and Google pixel-width limits and checks for image size. A tag checklist marks each required, recommended, and optional tag as on the page, missing, or added by the generated code. A favicon section shows the icon in light and dark browser tabs, at 16/32/48px, and on the iOS home screen, and lists every icon the page declares. Copy the result as HTML or a Next.js `metadata` export.
 
 The hosted site cannot reach `localhost`. For local pages, the Meta Tags tool first tries fetching directly from your browser (this works if the dev server allows CORS). If that fails, it offers a "Send to Meta Tags" bookmarklet, a paste-HTML option, or the local GUI below, whose `/api/meta` route can fetch localhost pages.
@@ -157,3 +157,12 @@ PNG outputs use transparent padding for non-square SVGs, Lanczos resizing, alpha
 ## Site Metadata
 
 The static GUI includes canonical tags, Open Graph tags, Twitter summary tags, JSON-LD, `robots.txt`, `sitemap.xml`, `llms.txt`, `humans.txt`, a web manifest, and simple light/dark favicon assets.
+
+## Development Checks
+
+```sh
+npm run check
+npm test
+```
+
+The tests decode generated PNGs to verify dimensions, pixel-exact lossless output, and compact palette quality. For UI changes, also check the three tools in Chrome at mobile and desktop widths, with reduced motion enabled and with delayed font/image loading.
